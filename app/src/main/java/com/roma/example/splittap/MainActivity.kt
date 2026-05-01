@@ -9,36 +9,47 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.roma.example.splittap.ui.auth.AuthViewModel
+import com.roma.example.splittap.ui.auth.LoginScreen
 import com.roma.example.splittap.ui.theme.SplitTapTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
-
-        db.collection("firebase_test")
-            .add(
-                mapOf(
-                    "message" to "Firebase is working",
-                    "time" to System.currentTimeMillis()
-                )
-            )
-            .addOnSuccessListener {
-                android.util.Log.d("FirebaseTest", "Firestore working ✅ Document ID: ${it.id}")
-            }
-            .addOnFailureListener {
-                android.util.Log.e("FirebaseTest", "Firestore failed ❌", it)
-            }
+//        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+//
+//        db.collection("firebase_test")
+//            .add(
+//                mapOf(
+//                    "message" to "Firebase is working",
+//                    "time" to System.currentTimeMillis()
+//                )
+//            )
+//            .addOnSuccessListener {
+//                android.util.Log.d("FirebaseTest", "Firestore working ✅ Document ID: ${it.id}")
+//            }
+//            .addOnFailureListener {
+//                android.util.Log.e("FirebaseTest", "Firestore failed ❌", it)
+//            }
 
         enableEdgeToEdge()
         setContent {
             SplitTapTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
+                val authViewModel: AuthViewModel = viewModel()
+                val uiState by authViewModel.uiState.collectAsState()
+
+                if (uiState.isLoggedIn) {
+                    Text("Login successful ✅")
+                } else {
+                    LoginScreen(
+                        uiState = uiState,
+                        onLoginClick = authViewModel::login,
+                        onRegisterClick = authViewModel::register
                     )
                 }
             }
