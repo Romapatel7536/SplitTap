@@ -16,6 +16,22 @@ import com.roma.example.splittap.ui.theme.SplitTapTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+
+        db.collection("firebase_test")
+            .add(
+                mapOf(
+                    "message" to "Firebase is working",
+                    "time" to System.currentTimeMillis()
+                )
+            )
+            .addOnSuccessListener {
+                android.util.Log.d("FirebaseTest", "Firestore working ✅ Document ID: ${it.id}")
+            }
+            .addOnFailureListener {
+                android.util.Log.e("FirebaseTest", "Firestore failed ❌", it)
+            }
+
         enableEdgeToEdge()
         setContent {
             SplitTapTheme {
