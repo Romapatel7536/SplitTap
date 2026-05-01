@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "698082440771",
+    "project_id": "splittap-311e4",
+    "storage_bucket": "splittap-311e4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:698082440771:android:35e6f740d073f182ec46f6",
+        "android_client_info": {
+          "package_name": "com.roma.example.splittap"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgv84Mzu9_SabpHouBbfGYXD4W_rtZSVw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
