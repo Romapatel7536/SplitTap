@@ -31,13 +31,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -45,6 +47,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.roma.example.splittap.R
+import com.roma.example.splittap.viewmodel.AuthUiState
 
 private const val MinimumPasswordLength = 8
 
@@ -52,47 +56,77 @@ private const val MinimumPasswordLength = 8
 fun LoginScreen(
     uiState: AuthUiState,
     onLoginClick: (String, String) -> Unit,
-    onRegisterClick: (String, String) -> Unit,
+    onRegisterClick: (String, String, String, String) -> Unit,
     onForgotPasswordClick: (String) -> Unit
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var showPassword by remember { mutableStateOf(false) }
-    var isSignUp by remember { mutableStateOf(false) }
-    var emailTouched by remember { mutableStateOf(false) }
-    var passwordTouched by remember { mutableStateOf(false) }
+    var fullName by rememberSaveable { mutableStateOf("") }
+    var contact by rememberSaveable { mutableStateOf("") }
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    var showPassword by rememberSaveable { mutableStateOf(false) }
+    var isSignUp by rememberSaveable { mutableStateOf(false) }
+    var nameTouched by rememberSaveable { mutableStateOf(false) }
+    var contactTouched by rememberSaveable { mutableStateOf(false) }
+    var emailTouched by rememberSaveable { mutableStateOf(false) }
+    var passwordTouched by rememberSaveable { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
 
-    val green = Color(0xFF1F8F74)
-    val ink = Color(0xFF343A40)
-    val muted = Color(0xFF747D86)
-    val border = Color(0xFFC9D2DA)
+    val green = colorResource(R.color.auth_primary)
+    val ink = colorResource(R.color.auth_ink)
+    val muted = colorResource(R.color.auth_muted)
+    val border = colorResource(R.color.auth_border)
+    val surface = colorResource(R.color.white)
+    val emailRequired = stringResource(R.string.auth_email_required)
+    val validEmailRequired = stringResource(R.string.auth_enter_valid_email)
+    val passwordRequired = stringResource(R.string.auth_password_required)
+    val minimumPassword = stringResource(R.string.auth_minimum_password)
+    val nameRequired = stringResource(R.string.auth_name_required)
+    val contactRequired = stringResource(R.string.auth_contact_required)
 
+    val nameError = when {
+        !isSignUp || !nameTouched -> null
+        fullName.isBlank() -> nameRequired
+        else -> null
+    }
+    val contactError = when {
+        !isSignUp || !contactTouched -> null
+        contact.isBlank() -> contactRequired
+        else -> null
+    }
     val emailError = when {
         !emailTouched -> null
-        email.isBlank() -> "Email is required"
-        !Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches() -> "Enter a valid email address"
+        email.isBlank() -> emailRequired
+        !Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches() -> validEmailRequired
         else -> null
     }
     val passwordError = when {
         !passwordTouched -> null
-        password.isBlank() -> "Password is required"
-        password.length < MinimumPasswordLength -> "Minimum $MinimumPasswordLength characters"
+        password.isBlank() -> passwordRequired
+        password.length < MinimumPasswordLength -> minimumPassword
         else -> null
     }
 
     fun submit() {
+        nameTouched = isSignUp
+        contactTouched = isSignUp
         emailTouched = true
         passwordTouched = true
 
+        val hasValidName = !isSignUp || fullName.isNotBlank()
+        val hasValidContact = !isSignUp || contact.isNotBlank()
         val hasValidEmail = email.isNotBlank() &&
             Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()
         val hasValidPassword = password.length >= MinimumPasswordLength
 
-        if (hasValidEmail && hasValidPassword) {
+        if (hasValidName && hasValidContact && hasValidEmail && hasValidPassword) {
             focusManager.clearFocus()
             if (isSignUp) {
-                onRegisterClick(email.trim(), password)
+                onRegisterClick(
+                    fullName.trim(),
+                    contact.trim(),
+                    email.trim(),
+                    password
+                )
             } else {
                 onLoginClick(email.trim(), password)
             }
@@ -101,7 +135,7 @@ fun LoginScreen(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color.White
+        color = surface
     ) {
         Column(
             modifier = Modifier
@@ -125,7 +159,7 @@ fun LoginScreen(
                             contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
                         ) {
                             Text(
-                                text = "<",
+                                text = stringResource(R.string.auth_back),
                                 color = ink,
                                 style = MaterialTheme.typography.headlineMedium,
                                 fontWeight = FontWeight.Medium
@@ -139,7 +173,11 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(52.dp))
 
                 Text(
-                    text = if (isSignUp) "Sign up" else "Log in",
+                    text = if (isSignUp) {
+                        stringResource(R.string.auth_sign_up_title)
+                    } else {
+                        stringResource(R.string.auth_log_in_title)
+                    },
                     style = MaterialTheme.typography.displaySmall,
                     color = ink,
                     fontWeight = FontWeight.Medium
@@ -147,8 +185,46 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(46.dp))
 
+                if (isSignUp) {
+                    AuthField(
+                        label = stringResource(R.string.auth_full_name),
+                        value = fullName,
+                        onValueChange = {
+                            fullName = it
+                            if (!nameTouched) nameTouched = true
+                        },
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Next,
+                        onNext = { focusManager.moveFocus(FocusDirection.Down) },
+                        error = nameError,
+                        border = border,
+                        focusedBorder = ink,
+                        textColor = ink
+                    )
+
+                    Spacer(modifier = Modifier.height(22.dp))
+
+                    AuthField(
+                        label = stringResource(R.string.auth_contact_number),
+                        value = contact,
+                        onValueChange = {
+                            contact = it
+                            if (!contactTouched) contactTouched = true
+                        },
+                        keyboardType = KeyboardType.Phone,
+                        imeAction = ImeAction.Next,
+                        onNext = { focusManager.moveFocus(FocusDirection.Down) },
+                        error = contactError,
+                        border = border,
+                        focusedBorder = ink,
+                        textColor = ink
+                    )
+
+                    Spacer(modifier = Modifier.height(22.dp))
+                }
+
                 AuthField(
-                    label = "Email address",
+                    label = stringResource(R.string.auth_email_address),
                     value = email,
                     onValueChange = {
                         email = it
@@ -166,7 +242,7 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(22.dp))
 
                 AuthField(
-                    label = "Password",
+                    label = stringResource(R.string.auth_password),
                     value = password,
                     onValueChange = {
                         password = it
@@ -177,11 +253,15 @@ fun LoginScreen(
                     onDone = { submit() },
                     error = passwordError,
                     helperText = if (isSignUp && passwordError == null) {
-                        "Minimum $MinimumPasswordLength characters"
+                        minimumPassword
                     } else {
                         null
                     },
-                    trailingText = if (showPassword) "Hide" else "Show",
+                    trailingText = if (showPassword) {
+                        stringResource(R.string.auth_hide_password)
+                    } else {
+                        stringResource(R.string.auth_show_password)
+                    },
                     onTrailingClick = { showPassword = !showPassword },
                     visualTransformation = if (showPassword) {
                         VisualTransformation.None
@@ -193,20 +273,20 @@ fun LoginScreen(
                     textColor = ink
                 )
 
-                uiState.errorMessage?.let {
+                uiState.errorMessageRes?.let {
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = it,
+                        text = stringResource(it),
                         modifier = Modifier.fillMaxWidth(),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
 
-                uiState.successMessage?.let {
+                uiState.successMessageRes?.let {
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = it,
+                        text = stringResource(it),
                         modifier = Modifier.fillMaxWidth(),
                         color = green,
                         style = MaterialTheme.typography.bodyMedium
@@ -232,11 +312,15 @@ fun LoginScreen(
                         CircularProgressIndicator(
                             modifier = Modifier.size(22.dp),
                             strokeWidth = 2.dp,
-                            color = Color.White
+                            color = surface
                         )
                     } else {
                         Text(
-                            text = if (isSignUp) "Next" else "Log in",
+                            text = if (isSignUp) {
+                                stringResource(R.string.auth_create_account)
+                            } else {
+                                stringResource(R.string.auth_log_in_title)
+                            },
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -254,7 +338,7 @@ fun LoginScreen(
                         enabled = !uiState.isLoading
                     ) {
                         Text(
-                            text = "Forgot your password?",
+                            text = stringResource(R.string.auth_forgot_password),
                             color = green,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
@@ -273,6 +357,8 @@ fun LoginScreen(
                 TextButton(
                     onClick = {
                         isSignUp = !isSignUp
+                        nameTouched = false
+                        contactTouched = false
                         emailTouched = false
                         passwordTouched = false
                     },
@@ -280,9 +366,9 @@ fun LoginScreen(
                 ) {
                     Text(
                         text = if (isSignUp) {
-                            "Already have an account? Log in"
+                            stringResource(R.string.auth_already_have_account)
                         } else {
-                            "New to SplitTap? Sign up"
+                            stringResource(R.string.auth_new_to_splittap)
                         },
                         color = green,
                         style = MaterialTheme.typography.bodyLarge,
@@ -310,14 +396,14 @@ private fun SplitTapMark(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "S",
+                text = stringResource(R.string.auth_logo_letter),
                 color = green,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
         }
         Text(
-            text = "SplitTap",
+            text = stringResource(R.string.app_name),
             color = ink,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold
@@ -397,7 +483,11 @@ private fun AuthField(
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = supportingText,
-                color = if (error != null) MaterialTheme.colorScheme.error else Color(0xFF747D86),
+                color = if (error != null) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    colorResource(R.color.auth_muted)
+                },
                 style = MaterialTheme.typography.bodyLarge
             )
         }
