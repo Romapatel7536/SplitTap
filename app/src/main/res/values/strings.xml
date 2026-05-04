@@ -1,3 +1,186 @@
 <resources>
     <string name="app_name">SplitTap</string>
+
+    <string name="home_dashboard_title">Dashboard</string>
+    <string name="home_dashboard_subtitle">Balances and shortcuts</string>
+    <string name="home_groups_title">Groups</string>
+    <string name="home_groups_subtitle">Homes and trips</string>
+    <string name="home_roommates_title">Roommates</string>
+    <string name="home_roommates_subtitle">People you split with</string>
+    <string name="home_expenses_title">Expenses</string>
+    <string name="home_expenses_subtitle">Bills and payments</string>
+    <string name="home_activity_title">Activity</string>
+    <string name="home_activity_subtitle">Updates and settlements</string>
+    <string name="home_settings_title">Settings</string>
+    <string name="home_settings_subtitle">Account and preferences</string>
+
+    <string name="home_dashboard_header_subtitle">Your SplitTap overview</string>
+    <string name="home_total_balance">Total Balance</string>
+    <string name="home_zero_balance">$0.00</string>
+    <string name="home_no_shared_expenses">No shared expenses yet</string>
+    <string name="home_you_are_owed">You are owed</string>
+    <string name="home_you_owe">You owe</string>
+    <string name="home_quick_actions">Quick actions</string>
+    <string name="home_add_expense">Add expense</string>
+    <string name="home_add_expense_caption">Record a bill</string>
+    <string name="home_create_group">Create group</string>
+    <string name="home_create_group_caption">Set up a home</string>
+    <string name="home_add_roommate">Add roommate</string>
+    <string name="home_add_roommate_caption">Invite by email</string>
+    <string name="home_payment_alert">Payment alert</string>
+    <string name="home_payment_alert_caption">Preview prompt</string>
+    <string name="home_no_roommates_yet">No roommates yet</string>
+    <string name="home_no_roommates_body">Add roommates and create your first group to begin tracking balances.</string>
+    <string name="home_add_first_roommate">Add your first roommate</string>
+
+    <string name="home_no_groups_yet">No groups yet</string>
+    <string name="home_no_groups_body">Create a home, apartment, trip, or roommate group to start splitting shared expenses.</string>
+    <string name="home_no_roommates_feature_body">Invite roommates by email. Their balances will appear here after shared expenses are added.</string>
+    <string name="home_no_expenses_yet">No expenses yet</string>
+    <string name="home_no_expenses_body">Add groceries, rent, utilities, or a detected payment when you are ready.</string>
+    <string name="home_no_activity_yet">Nothing to review yet</string>
+    <string name="home_no_activity_body">New expenses, edits, settlements, and payment-detection prompts will show up here.</string>
+    <string name="home_open_dashboard">Open dashboard</string>
+
+    <string name="home_settings_header_subtitle">Account and notification preferences</string>
+    <string name="home_signed_in">Signed in</string>
+    <string name="home_no_email_available">No email available</string>
+    <string name="home_notifications">Notifications</string>
+    <string name="home_payment_detection">Payment Detection</string>
+    <string name="home_payment_detection_caption">Coming in notification access feature</string>
+    <string name="home_expense_reminders">Expense Reminders</string>
+    <string name="home_expense_reminders_caption">Planned for roommate follow-ups</string>
+    <string name="home_settlement_notifications">Settlement Notifications</string>
+    <string name="home_settlement_notifications_caption">Planned for balances and payments</string>
+    <string name="home_support">Support</string>
+    <string name="home_help_center">Help Center</string>
+    <string name="home_help_center_caption">Documentation placeholder</string>
+    <string name="home_contact_support">Contact Support</string>
+    <string name="home_contact_support_caption">Support flow placeholder</string>
+    <string name="home_privacy_policy">Privacy Policy</string>
+    <string name="home_privacy_policy_caption">Policy placeholder</string>
+    <string name="home_logout">Log Out</string>
+
+    <string name="home_drawer_app_title">SplitTap</string>
+    <string name="home_signed_in_fallback">Signed in</string>
+    <string name="home_next_feature">Next feature</string>
+    <string name="home_next_feature_body">Connect groups, roommates, and expenses to Firestore.</string>
+
+    <string name="home_payment_detected">Payment Detected</string>
+    <string name="home_payment_detected_body">When notification access is connected, payment details will appear here instantly.</string>
+    <string name="home_sample_preview">Sample preview</string>
+    <string name="home_add_as_expense">Add as Expense</string>
+    <string name="home_remind_later">Remind Later</string>
+    <string name="home_ignore">Ignore</string>
+
+    <string name="home_cd_open_menu">Open menu</string>
+    <string name="home_cd_close_menu">Close menu</string>
+    <string name="home_cd_app_mark">SplitTap app mark</string>
+    <string name="home_cd_empty_illustration">Empty state illustration</string>
+    <string name="home_cd_payment_icon">Payment icon</string>
+    <string name="home_cd_back">Go back</string>
+
+    <!-- Dashboard placeholder strings -->
+    <string name="home_view_all">View All</string>
+    <string name="home_roommate_initial">R</string>
+    <string name="home_test_roommate_a">Roommate A</string>
+    <string name="home_test_roommate_b">Roommate B</string>
+    <string name="home_test_roommate_c">Roommate C</string>
+    <string name="home_test_roommate_a_balance">$50.00</string>
+    <string name="home_test_roommate_b_balance">+$75.50</string>
+    <string name="home_test_roommate_c_balance">$25.00</string>
+
+    <!-- Add Expense screen strings -->
+    <string name="add_expense_title">Add Expense</string>
+    <string name="add_expense_subtitle">Record and split a shared payment</string>
+    <string name="add_expense_save">Save Expense</string>
+    <string name="add_expense_saving">Saving…</string>
+    <string name="add_expense_invalid_input">Enter an amount, description, and at least one roommate.</string>
+    <string name="add_expense_save_error">Failed to save expense. Please try again.</string>
+    <string name="add_expense_description">Description</string>
+    <string name="add_expense_description_hint">e.g., Groceries</string>
+    <string name="add_expense_amount">Amount</string>
+    <string name="add_expense_amount_hint">0.00</string>
+    <string name="add_expense_amount_format">$%1$.2f</string>
+    <string name="add_expense_total_amount">Total amount</string>
+    <string name="add_expense_category">Category</string>
+    <string name="add_expense_category_food">Food</string>
+    <string name="add_expense_category_bills">Bills</string>
+    <string name="add_expense_category_dining">Dining</string>
+    <string name="add_expense_category_transport">Transport</string>
+    <string name="add_expense_category_shopping">Shopping</string>
+    <string name="add_expense_category_entertainment">Entertainment</string>
+    <string name="add_expense_category_other">Other</string>
+    <string name="add_expense_paid_by">Paid By</string>
+    <string name="add_expense_you">You</string>
+    <string name="add_expense_paid_by_caption">This expense will be saved under your account</string>
+    <string name="add_expense_split_with">Split With</string>
+    <string name="add_expense_roommate_a">Roommate A</string>
+    <string name="add_expense_roommate_b">Roommate B</string>
+    <string name="add_expense_roommate_c">Roommate C</string>
+    <string name="add_expense_split_type">Split Type</string>
+    <string name="add_expense_equal_split">Equal Split</string>
+    <string name="add_expense_equal_split_caption">Everyone pays the same share</string>
+    <string name="add_expense_custom_split">Custom Split</string>
+    <string name="add_expense_custom_split_caption">Set different shares later</string>
+
+    <!-- Create Group screen strings -->
+    <string name="create_group_title">Create Group</string>
+    <string name="create_group_subtitle">Set up a space for shared expenses</string>
+    <string name="create_group_save">Create Group</string>
+    <string name="create_group_name">Group Name</string>
+    <string name="create_group_name_hint">e.g., Apartment Group</string>
+    <string name="create_group_description">Description</string>
+    <string name="create_group_description_hint">Optional note about this group</string>
+    <string name="create_group_add_members">Add Members</string>
+    <string name="create_group_member_email_hint">Enter email address</string>
+    <string name="create_group_add_another_member">Add Another Member</string>
+    <string name="create_group_invitation_notice">Members will receive an invitation to join this group</string>
+    <string name="create_group_type">Group Type</string>
+    <string name="create_group_home">Home</string>
+    <string name="create_group_trip">Trip</string>
+    <string name="create_group_couple">Couple</string>
+    <string name="create_group_other">Other</string>
+    <string name="create_group_hero_title">Split together</string>
+    <string name="create_group_hero_body">Invite roommates and track expenses in one shared place.</string>
+    <string name="create_group_invite_title">Invite roommates next</string>
+    <string name="create_group_invite_body">After creating the group, you can add members by email.</string>
+
+    <string name="auth_email_required">Email is required</string>
+    <string name="auth_name_required">Full name is required</string>
+    <string name="auth_contact_required">Contact number is required</string>
+    <string name="auth_enter_valid_email">Enter a valid email address</string>
+    <string name="auth_password_required">Password is required</string>
+    <string name="auth_minimum_password">Minimum 8 characters</string>
+    <string name="auth_sign_up_title">Sign up</string>
+    <string name="auth_log_in_title">Log in</string>
+    <string name="auth_full_name">Full name</string>
+    <string name="auth_contact_number">Contact number</string>
+    <string name="auth_email_address">Email address</string>
+    <string name="auth_password">Password</string>
+    <string name="auth_hide_password">Hide</string>
+    <string name="auth_show_password">Show</string>
+    <string name="auth_next">Next</string>
+    <string name="auth_forgot_password">Forgot your password?</string>
+    <string name="auth_already_have_account">Already have an account? Log in</string>
+    <string name="auth_new_to_splittap">New to SplitTap? Sign up</string>
+    <string name="auth_logo_letter">S</string>
+    <string name="auth_back">Back</string>
+    <string name="auth_create_account">Create account</string>
+
+    <string name="auth_reset_sent">Password reset email sent. Check your inbox.</string>
+    <string name="auth_enter_password">Enter your password</string>
+    <string name="auth_password_min_error">Password must be at least 8 characters</string>
+    <string name="auth_enter_email">Enter your email address</string>
+    <string name="auth_no_account">No account found with this email address.</string>
+    <string name="auth_invalid_credentials">Email or password is incorrect.</string>
+    <string name="auth_email_exists">An account already exists with this email address.</string>
+    <string name="auth_weak_password">Password is too weak. Use at least 8 characters.</string>
+    <string name="auth_network_error">Network error. Check your connection and try again.</string>
+    <string name="auth_generic_error">Something went wrong. Please try again.</string>
+
+    <!-- Home Errors -->
+    <string name="home_error_not_logged_in">User not logged in.</string>
+    <string name="home_error_load_data">Failed to load home data. Please try again.</string>
+    <string name="home_error_save_expense">Failed to save expense. Please try again.</string>
 </resources>
