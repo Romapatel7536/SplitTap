@@ -1,4 +1,4 @@
-package com.roma.example.splittap.ui.home
+package com.roma.example.splittap.ui.home.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -33,7 +33,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.roma.example.splittap.R
-import com.roma.example.splittap.viewmodel.HomeUiState
+import com.roma.example.splittap.ui.home.AppBackground
+import com.roma.example.splittap.ui.home.AppBorder
+import com.roma.example.splittap.ui.home.AppDanger
+import com.roma.example.splittap.ui.home.AppInk
+import com.roma.example.splittap.ui.home.AppMark
+import com.roma.example.splittap.ui.home.AppMuted
+import com.roma.example.splittap.ui.home.AppPrimary
+import com.roma.example.splittap.ui.home.AppSurface
+import com.roma.example.splittap.ui.home.CompactHeader
+import com.roma.example.splittap.ui.home.HomeUiState
+import com.roma.example.splittap.ui.home.SectionTitle
 
 
 @Composable

@@ -1,4 +1,4 @@
-package com.roma.example.splittap.ui.home
+package com.roma.example.splittap.ui.home.drawer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,7 +34,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.roma.example.splittap.R
-import com.roma.example.splittap.viewmodel.HomeUiState
+import com.roma.example.splittap.ui.home.AppAccent
+import com.roma.example.splittap.ui.home.AppInk
+import com.roma.example.splittap.ui.home.AppMark
+import com.roma.example.splittap.ui.home.AppMuted
+import com.roma.example.splittap.ui.home.AppPrimary
+import com.roma.example.splittap.ui.home.AppSurface
+import com.roma.example.splittap.ui.home.AppTransparent
+import com.roma.example.splittap.ui.home.HomeDestination
+import com.roma.example.splittap.ui.home.HomeUiState
 
 @Composable
 fun SplitTapDrawer(

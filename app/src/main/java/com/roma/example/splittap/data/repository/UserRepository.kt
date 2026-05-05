@@ -21,4 +21,13 @@ class UserRepository(
             .await()
             .toObject(UserProfile::class.java)
     }
+
+    suspend fun getAllUsersExcept(currentUserId: String): List<UserProfile> {
+        return db.collection(FirestoreCollections.USERS)
+            .get()
+            .await()
+            .documents
+            .mapNotNull { it.toObject(UserProfile::class.java) }
+            .filter { it.uid != currentUserId }
+    }
 }

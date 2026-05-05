@@ -1,4 +1,4 @@
-package com.roma.example.splittap.ui.home
+package com.roma.example.splittap.ui.home.dashboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -25,6 +25,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.roma.example.splittap.R
+import com.roma.example.splittap.ui.home.AppPrimary
+import com.roma.example.splittap.ui.home.AppPrimaryDark
+import com.roma.example.splittap.ui.home.AppSurface
+import com.roma.example.splittap.ui.home.IconButtonSurface
+import com.roma.example.splittap.ui.home.formatCurrency
 
 @Composable
 fun DashboardHeader(
