@@ -37,8 +37,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -58,17 +58,12 @@ import com.roma.example.splittap.ui.home.AppInk
 import com.roma.example.splittap.ui.home.AppMuted
 import com.roma.example.splittap.ui.home.AppPrimary
 import com.roma.example.splittap.ui.home.AppSurface
-import com.roma.example.splittap.viewmodel.AddExpenseUiState
 
 private data class ExpenseCategoryOption(
     @StringRes val titleRes: Int,
     val code: ExpenseCategory
 )
 
-data class SplitMemberUi(
-    val uid: String,
-    val name: String
-)
 @Composable
 fun AddExpenseScreen(
     uiState: AddExpenseUiState,
@@ -84,36 +79,45 @@ fun AddExpenseScreen(
 ) {
     var description by rememberSaveable { mutableStateOf("") }
     var amount by rememberSaveable { mutableStateOf("") }
-    var selectedCategoryName by rememberSaveable { mutableStateOf(ExpenseCategory.Food.name) }
-    var splitTypeName by rememberSaveable { mutableStateOf(ExpenseSplitType.Equal.name) }
+    var selectedCategoryName by rememberSaveable { mutableStateOf(ExpenseCategory.FOOD.name) }
+    var splitTypeName by rememberSaveable { mutableStateOf(ExpenseSplitType.EQUAL.name) }
     var selectedRoommateIdsText by rememberSaveable { mutableStateOf("") }
-
-    val categories = remember {
-        listOf(
-            ExpenseCategoryOption(R.string.add_expense_category_food, ExpenseCategory.Food),
-            ExpenseCategoryOption(R.string.add_expense_category_bills, ExpenseCategory.Bills),
-            ExpenseCategoryOption(R.string.add_expense_category_dining, ExpenseCategory.Dining),
-            ExpenseCategoryOption(
-                R.string.add_expense_category_transport,
-                ExpenseCategory.Transport
-            ),
-            ExpenseCategoryOption(
-                R.string.add_expense_category_shopping,
-                ExpenseCategory.Shopping
-            ),
-            ExpenseCategoryOption(
-                R.string.add_expense_category_entertainment,
-                ExpenseCategory.Entertainment
-            ),
-            ExpenseCategoryOption(R.string.add_expense_category_other, ExpenseCategory.Other)
-        )
-    }
     val selectedCategory = ExpenseCategory.valueOf(selectedCategoryName)
     val splitType = ExpenseSplitType.valueOf(splitTypeName)
     val selectedRoommateIds = selectedRoommateIdsText.toIdList()
 
-    val amountValue = amount.toDoubleOrNull()
     val canSubmit = !uiState.isSaving
+
+    val categories = remember {
+        listOf(
+            ExpenseCategoryOption(R.string.add_expense_category_food, ExpenseCategory.FOOD),
+            ExpenseCategoryOption(R.string.add_expense_category_bills, ExpenseCategory.BILLS),
+            ExpenseCategoryOption(R.string.add_expense_category_dining, ExpenseCategory.DINING),
+            ExpenseCategoryOption(
+                R.string.add_expense_category_transport,
+                ExpenseCategory.TRANSPORT
+            ),
+            ExpenseCategoryOption(
+                R.string.add_expense_category_shopping,
+                ExpenseCategory.SHOPPING
+            ),
+            ExpenseCategoryOption(
+                R.string.add_expense_category_entertainment,
+                ExpenseCategory.ENTERTAINMENT
+            ),
+            ExpenseCategoryOption(R.string.add_expense_category_other, ExpenseCategory.OTHER)
+        )
+    }
+
+    fun toggleRoommate(uid: String) {
+        val currentIds = selectedRoommateIdsText.toIdList()
+
+        selectedRoommateIdsText = if (currentIds.contains(uid)) {
+            (currentIds - uid).joinToString(",")
+        } else {
+            (currentIds + uid).joinToString(",")
+        }
+    }
 
     Scaffold(
         containerColor = AppBackground,
@@ -122,14 +126,12 @@ fun AddExpenseScreen(
                 canSubmit = canSubmit,
                 isSaving = uiState.isSaving,
                 onSave = {
-                    val currentRoommateIds = selectedRoommateIdsText.toIdList()
-
                     onSaveExpense(
                         description,
                         amount.toDoubleOrNull(),
-                        ExpenseCategory.valueOf(selectedCategoryName),
-                        ExpenseSplitType.valueOf(splitTypeName),
-                        currentRoommateIds
+                        selectedCategory,
+                        splitType,
+                        selectedRoommateIds
                     )
                 }
             )
@@ -198,12 +200,7 @@ fun AddExpenseScreen(
                     SplitWithRow(
                         name = member.name,
                         selected = selectedRoommateIds.contains(member.uid),
-                        onClick = {
-                            selectedRoommateIdsText = selectedRoommateIdsText
-                                .toIdList()
-                                .toggle(member.uid)
-                                .toIdText()
-                        }
+                        onClick = { toggleRoommate(member.uid) }
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                 }
@@ -451,14 +448,14 @@ private fun SplitTypeSelector(
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         SplitTypeButton(
             text = stringResource(R.string.add_expense_equal_split),
-            selected = splitType == ExpenseSplitType.Equal,
-            onClick = { onSplitTypeSelected(ExpenseSplitType.Equal) },
+            selected = splitType == ExpenseSplitType.EQUAL,
+            onClick = { onSplitTypeSelected(ExpenseSplitType.EQUAL) },
             modifier = Modifier.weight(1f)
         )
         SplitTypeButton(
             text = stringResource(R.string.add_expense_custom_split),
-            selected = splitType == ExpenseSplitType.Custom,
-            onClick = { onSplitTypeSelected(ExpenseSplitType.Custom) },
+            selected = splitType == ExpenseSplitType.CUSTOM,
+            onClick = { onSplitTypeSelected(ExpenseSplitType.CUSTOM) },
             modifier = Modifier.weight(1f)
         )
     }
@@ -545,5 +542,4 @@ private fun List<String>.toIdText(): String {
 private fun List<String>.toggle(id: String): List<String> {
     return if (contains(id)) this - id else this + id
 }
-
 private const val IdSeparator = ","

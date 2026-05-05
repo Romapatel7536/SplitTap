@@ -83,12 +83,9 @@
     <!-- Dashboard placeholder strings -->
     <string name="home_view_all">View All</string>
     <string name="home_roommate_initial">R</string>
-    <string name="home_test_roommate_a">Roommate A</string>
-    <string name="home_test_roommate_b">Roommate B</string>
-    <string name="home_test_roommate_c">Roommate C</string>
-    <string name="home_test_roommate_a_balance">$50.00</string>
-    <string name="home_test_roommate_b_balance">+$75.50</string>
-    <string name="home_test_roommate_c_balance">$25.00</string>
+    <string name="home_unknown_user">Unknown user</string>
+    <string name="home_owes_you">owes you</string>
+    <string name="home_you_owe_label">you owe</string>
 
     <!-- Add Expense screen strings -->
     <string name="add_expense_title">Add Expense</string>
@@ -115,9 +112,6 @@
     <string name="add_expense_you">You</string>
     <string name="add_expense_paid_by_caption">This expense will be saved under your account</string>
     <string name="add_expense_split_with">Split With</string>
-    <string name="add_expense_roommate_a">Roommate A</string>
-    <string name="add_expense_roommate_b">Roommate B</string>
-    <string name="add_expense_roommate_c">Roommate C</string>
     <string name="add_expense_split_type">Split Type</string>
     <string name="add_expense_equal_split">Equal Split</string>
     <string name="add_expense_equal_split_caption">Everyone pays the same share</string>
@@ -167,6 +161,22 @@
     <string name="auth_logo_letter">S</string>
     <string name="auth_back">Back</string>
     <string name="auth_create_account">Create account</string>
+    <string name="auth_login_headline">Welcome back</string>
+    <string name="auth_login_subtitle">Log in to your account</string>
+    <string name="auth_register_headline">Create account</string>
+    <string name="auth_register_subtitle">Join SplitTap to start splitting expenses</string>
+    <string name="auth_email_hint">your@email.com</string>
+    <string name="auth_name_hint">Your name</string>
+    <string name="auth_contact_hint">Your contact number</string>
+    <string name="auth_password_hint">Enter your password</string>
+    <string name="auth_password_create_hint">Create a password</string>
+    <string name="auth_confirm_password">Confirm password</string>
+    <string name="auth_confirm_password_hint">Confirm your password</string>
+    <string name="auth_forgot_password_short">Forgot password?</string>
+    <string name="auth_log_in_button">Log In</string>
+    <string name="auth_sign_up_button">Sign Up</string>
+    <string name="auth_confirm_password_required">Confirm your password</string>
+    <string name="auth_passwords_do_not_match">Passwords do not match</string>
 
     <string name="auth_reset_sent">Password reset email sent. Check your inbox.</string>
     <string name="auth_enter_password">Enter your password</string>
@@ -183,4 +193,19 @@
     <string name="home_error_not_logged_in">User not logged in.</string>
     <string name="home_error_load_data">Failed to load home data. Please try again.</string>
     <string name="home_error_save_expense">Failed to save expense. Please try again.</string>
+
+    <!-- Roommates -->
+    <string name="roommates_title">Roommates</string>
+    <string name="roommates_add_roommate">Add Roommate</string>
+    <string name="roommates_owes_you">owes you</string>
+    <string name="roommates_you_owe">you owe</string>
+    <string name="roommates_empty_title">No roommates yet</string>
+    <string name="roommates_empty_body">Invite roommates to split expenses and track balances together.</string>
+    <string name="roommates_view_all_content_description">View all roommates</string>
+    <string name="add_roommate_title">Add Roommate</string>
+    <string name="add_roommate_email_address">Email Address</string>
+    <string name="add_roommate_email_hint">roommate@email.com</string>
+    <string name="add_roommate_invitation_notice">Your roommate will receive an invitation to connect on SplitTap</string>
+    <string name="add_roommate_send_invitation">Send Invitation</string>
+    <string name="failed_to_load_roommates">Failed to load roommates</string>
 </resources>

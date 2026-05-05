@@ -1,4 +1,4 @@
-package com.roma.example.splittap.ui.home
+package com.roma.example.splittap.ui.home.dashboard
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -38,7 +38,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.roma.example.splittap.R
-import com.roma.example.splittap.viewmodel.HomeUiState
+import com.roma.example.splittap.ui.home.AppAccent
+import com.roma.example.splittap.ui.home.AppBackground
+import com.roma.example.splittap.ui.home.AppBorder
+import com.roma.example.splittap.ui.home.AppDanger
+import com.roma.example.splittap.ui.home.AppInk
+import com.roma.example.splittap.ui.home.AppMuted
+import com.roma.example.splittap.ui.home.AppPrimary
+import com.roma.example.splittap.ui.home.AppSuccess
+import com.roma.example.splittap.ui.home.AppSurface
+import com.roma.example.splittap.ui.home.EmptyStatePanel
+import com.roma.example.splittap.ui.home.HomeUiState
+import com.roma.example.splittap.ui.home.SectionTitle
+import com.roma.example.splittap.ui.home.formatCurrency
+import kotlin.math.abs
 
 @Composable
 fun DashboardScreen(
@@ -47,6 +60,7 @@ fun DashboardScreen(
     onAddExpense: () -> Unit,
     onCreateGroup: () -> Unit,
     onAddRoommate: () -> Unit,
+    onViewAllRoommates: () -> Unit,
     onShowPaymentDetection: () -> Unit
 ) {
     BoxWithConstraints(
@@ -57,11 +71,13 @@ fun DashboardScreen(
         val compactWidth = maxWidth < 360.dp
         val horizontalPadding = if (compactWidth) 16.dp else 22.dp
         val contentSpacing = if (compactWidth) 12.dp else 18.dp
+
         val headerHeight = when {
             maxHeight < 650.dp -> 250.dp
             maxWidth > 600.dp -> 340.dp
             else -> 292.dp
         }
+
         val contentTopPadding = headerHeight - when {
             maxHeight < 650.dp -> 24.dp
             maxWidth > 600.dp -> 56.dp
@@ -96,6 +112,7 @@ fun DashboardScreen(
                     iconRes = R.drawable.ic_trending_up_24,
                     modifier = Modifier.weight(1f)
                 )
+
                 BalanceMetricCard(
                     title = stringResource(R.string.home_you_owe),
                     value = formatCurrency(uiState.youOwe),
@@ -106,6 +123,7 @@ fun DashboardScreen(
             }
 
             SectionTitle(title = stringResource(R.string.home_quick_actions))
+
             Row(horizontalArrangement = Arrangement.spacedBy(if (compactWidth) 10.dp else 14.dp)) {
                 QuickActionCard(
                     title = stringResource(R.string.home_add_expense),
@@ -115,6 +133,7 @@ fun DashboardScreen(
                     compact = compactWidth,
                     modifier = Modifier.weight(1f)
                 )
+
                 QuickActionCard(
                     title = stringResource(R.string.home_create_group),
                     caption = stringResource(R.string.home_create_group_caption),
@@ -124,6 +143,7 @@ fun DashboardScreen(
                     modifier = Modifier.weight(1f)
                 )
             }
+
             Row(horizontalArrangement = Arrangement.spacedBy(if (compactWidth) 10.dp else 14.dp)) {
                 QuickActionCard(
                     title = stringResource(R.string.home_add_roommate),
@@ -133,6 +153,7 @@ fun DashboardScreen(
                     compact = compactWidth,
                     modifier = Modifier.weight(1f)
                 )
+
                 QuickActionCard(
                     title = stringResource(R.string.home_payment_alert),
                     caption = stringResource(R.string.home_payment_alert_caption),
@@ -151,35 +172,55 @@ fun DashboardScreen(
                     title = stringResource(R.string.home_roommates_title),
                     modifier = Modifier.weight(1f)
                 )
-                Text(
-                    text = stringResource(R.string.home_view_all),
-                    color = AppPrimary,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Icon(
-                    painter = painterResource(R.drawable.ic_chevron_right_24),
-                    contentDescription = null,
-                    tint = AppPrimary,
-                    modifier = Modifier.size(20.dp)
-                )
+
+                Row(
+                    modifier = Modifier.clickable(onClick = onViewAllRoommates),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.home_view_all),
+                        color = AppPrimary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Icon(
+                        painter = painterResource(R.drawable.ic_chevron_right_24),
+                        contentDescription = stringResource(R.string.roommates_view_all_content_description),
+                        tint = AppPrimary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
-            RoommatePreviewRow(
-                name = stringResource(R.string.home_test_roommate_a),
-                amount = stringResource(R.string.home_test_roommate_a_balance),
-                amountColor = AppDanger
-            )
-            RoommatePreviewRow(
-                name = stringResource(R.string.home_test_roommate_b),
-                amount = stringResource(R.string.home_test_roommate_b_balance),
-                amountColor = AppSuccess
-            )
-            RoommatePreviewRow(
-                name = stringResource(R.string.home_test_roommate_c),
-                amount = stringResource(R.string.home_test_roommate_c_balance),
-                amountColor = AppDanger
-            )
+
+            if (uiState.roommateBalances.isEmpty()) {
+                EmptyStatePanel(
+                    title = stringResource(R.string.home_no_roommates_yet),
+                    body = stringResource(R.string.home_no_roommates_body),
+                    action = stringResource(R.string.home_add_first_roommate),
+                    onActionClick = onAddRoommate
+                )
+            } else {
+                uiState.roommateBalances.forEach { roommate ->
+                    val isOwedToYou = roommate.amount > 0.0
+                    val displayName = roommate.name.ifBlank {
+                        stringResource(R.string.home_unknown_user)
+                    }
+
+                    RoommatePreviewRow(
+                        name = displayName,
+                        amount = formatCurrency(abs(roommate.amount)),
+                        amountLabel = if (isOwedToYou) {
+                            stringResource(R.string.home_owes_you)
+                        } else {
+                            stringResource(R.string.home_you_owe_label)
+                        },
+                        amountColor = if (isOwedToYou) AppSuccess else AppDanger
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(18.dp))
         }
@@ -259,13 +300,16 @@ fun BalanceMetricCard(
                     modifier = Modifier.size(20.dp)
                 )
             }
+
             Spacer(modifier = Modifier.width(14.dp))
+
             Column {
                 Text(
                     text = title,
                     color = AppMuted,
                     style = MaterialTheme.typography.bodyMedium
                 )
+
                 Text(
                     text = value,
                     color = tone,
@@ -281,6 +325,7 @@ fun BalanceMetricCard(
 private fun RoommatePreviewRow(
     name: String,
     amount: String,
+    amountLabel: String,
     amountColor: Color
 ) {
     Surface(
@@ -303,27 +348,44 @@ private fun RoommatePreviewRow(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = stringResource(R.string.home_roommate_initial),
+                    text = name.firstOrNull()?.uppercase()
+                        ?: stringResource(R.string.home_roommate_initial),
                     color = AppPrimary,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
             }
+
             Spacer(modifier = Modifier.width(16.dp))
+
             Text(
                 text = name,
                 color = AppInk,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
-            Text(
-                text = amount,
-                color = amountColor,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = amountLabel,
+                    color = amountColor,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = amount,
+                    color = amountColor,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
             Spacer(modifier = Modifier.width(10.dp))
+
             Icon(
                 painter = painterResource(R.drawable.ic_chevron_right_24),
                 contentDescription = null,

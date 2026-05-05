@@ -1,4 +1,4 @@
-package com.roma.example.splittap.ui.home
+package com.roma.example.splittap.ui.payment
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,7 +34,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.roma.example.splittap.R
-
+import com.roma.example.splittap.ui.home.AppAccent
+import com.roma.example.splittap.ui.home.AppInk
+import com.roma.example.splittap.ui.home.AppMuted
+import com.roma.example.splittap.ui.home.AppPrimary
+import com.roma.example.splittap.ui.home.AppPrimaryDark
+import com.roma.example.splittap.ui.home.AppScrim
+import com.roma.example.splittap.ui.home.AppSurface
 
 @Composable
 fun PaymentDetectionSheet(
@@ -64,11 +70,7 @@ fun PaymentDetectionSheet(
                     modifier = Modifier
                         .size(76.dp)
                         .clip(CircleShape)
-                        .background(
-                            Brush.linearGradient(
-                                listOf(AppPrimary, AppPrimaryDark)
-                            )
-                        ),
+                        .background(Brush.linearGradient(listOf(AppPrimary, AppPrimaryDark))),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -78,21 +80,27 @@ fun PaymentDetectionSheet(
                         modifier = Modifier.size(36.dp)
                     )
                 }
+
                 Spacer(modifier = Modifier.height(18.dp))
+
                 Text(
                     text = stringResource(R.string.home_payment_detected),
                     color = AppInk,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
+
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Text(
                     text = stringResource(R.string.home_payment_detected_body),
                     color = AppMuted,
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
                 )
+
                 Spacer(modifier = Modifier.height(18.dp))
+
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
@@ -115,7 +123,9 @@ fun PaymentDetectionSheet(
                         )
                     }
                 }
+
                 Spacer(modifier = Modifier.height(18.dp))
+
                 Button(
                     onClick = onAddExpense,
                     modifier = Modifier.fillMaxWidth(),
@@ -124,7 +134,9 @@ fun PaymentDetectionSheet(
                 ) {
                     Text(stringResource(R.string.home_add_as_expense))
                 }
+
                 Spacer(modifier = Modifier.height(10.dp))
+
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedButton(
                         onClick = onDismiss,

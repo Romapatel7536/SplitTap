@@ -9,21 +9,26 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.roma.example.splittap.R
 import com.roma.example.splittap.ui.expense.AddExpenseScreen
-import com.roma.example.splittap.ui.expense.SplitMemberUi
+import com.roma.example.splittap.ui.expense.AddExpenseViewModel
 import com.roma.example.splittap.ui.group.CreateGroupScreen
-import com.roma.example.splittap.viewmodel.AddExpenseViewModel
-import com.roma.example.splittap.viewmodel.HomeUiState
+import com.roma.example.splittap.ui.home.dashboard.DashboardScreen
+import com.roma.example.splittap.ui.home.drawer.SplitTapDrawer
+import com.roma.example.splittap.ui.home.settings.SettingsScreen
+import com.roma.example.splittap.ui.payment.PaymentDetectionSheet
+import com.roma.example.splittap.ui.roommate.AddRoommateScreen
+import com.roma.example.splittap.ui.roommate.RoommatesScreen
 import kotlinx.coroutines.launch
 
 @Composable
@@ -35,6 +40,7 @@ fun HomeScreen(
     var activeRoute by remember { mutableStateOf(HomeRoute.Main) }
     var selectedDestination by remember { mutableStateOf(HomeDestination.Dashboard) }
     var showPaymentDetection by remember { mutableStateOf(false) }
+    var addRoommateEmail by rememberSaveable { mutableStateOf("") }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val addExpenseViewModel: AddExpenseViewModel = viewModel()
@@ -49,6 +55,7 @@ fun HomeScreen(
                 onClose = { scope.launch { drawerState.close() } },
                 onDestinationSelected = { destination ->
                     selectedDestination = destination
+                    activeRoute = HomeRoute.Main
                     scope.launch { drawerState.close() }
                 }
             )
@@ -62,41 +69,47 @@ fun HomeScreen(
                     .background(AppBackground)
             ) {
                 when (activeRoute) {
-                    HomeRoute.AddExpense -> AddExpenseScreen(
-                        uiState = addUiState,
-                        members = listOf(
-                            SplitMemberUi(
-                                uid = 1.toString(),
-                                name = stringResource(R.string.add_expense_roommate_a)
-                            ),
-                            SplitMemberUi(
-                                uid = 2.toString(),
-                                name = stringResource(R.string.add_expense_roommate_b)
-                            ),
-                            SplitMemberUi(
-                                uid = 3.toString(),
-                                name = stringResource(R.string.add_expense_roommate_c)
-                            )
-                        ),
-                        onBack = { activeRoute = HomeRoute.Main },
-                        onSaveExpense = { description, amount, category, splitType, selectedRoommateIds ->
-                            addExpenseViewModel.saveExpense(
-                                description = description,
-                                amount = amount,
-                                category = category,
-                                splitType = splitType,
-                                selectedRoommateIds = selectedRoommateIds
-                            ) {
-                                activeRoute = HomeRoute.Main
-                                onRefreshHome()
-                            }
+                    HomeRoute.AddExpense -> {
+
+                        LaunchedEffect(Unit) {
+                            addExpenseViewModel.loadMembers()
                         }
-                    )
+
+                        AddExpenseScreen(
+                            uiState = addUiState,
+                            members = addUiState.members,
+                            onBack = { activeRoute = HomeRoute.Main },
+                            onSaveExpense = { description, amount, category, splitType, selectedRoommateIds ->
+                                addExpenseViewModel.saveExpense(
+                                    description = description,
+                                    amount = amount,
+                                    category = category,
+                                    splitType = splitType,
+                                    selectedRoommateIds = selectedRoommateIds,
+                                    onSuccess = {
+                                        activeRoute = HomeRoute.Main
+                                        onRefreshHome()
+                                    }
+                                )
+                            }
+                        )
+                    }
 
                     HomeRoute.CreateGroup -> CreateGroupScreen(
                         isSaving = false,
                         onBack = { activeRoute = HomeRoute.Main },
                         onCreateGroup = { _, _, _ -> activeRoute = HomeRoute.Main }
+                    )
+
+                    HomeRoute.AddRoommate -> AddRoommateScreen(
+                        email = addRoommateEmail,
+                        onEmailChange = { addRoommateEmail = it },
+                        onBack = { activeRoute = HomeRoute.Main },
+                        onSendInvitation = {
+                            addRoommateEmail = ""
+                            selectedDestination = HomeDestination.Roommates
+                            activeRoute = HomeRoute.Main
+                        }
                     )
 
                     HomeRoute.Main -> {
@@ -106,7 +119,12 @@ fun HomeScreen(
                                 onOpenDrawer = { scope.launch { drawerState.open() } },
                                 onAddExpense = { activeRoute = HomeRoute.AddExpense },
                                 onCreateGroup = { activeRoute = HomeRoute.CreateGroup },
-                                onAddRoommate = { selectedDestination = HomeDestination.Roommates },
+                                onAddRoommate = {
+                                    selectedDestination = HomeDestination.Roommates
+                                },
+                                onViewAllRoommates = {
+                                    selectedDestination = HomeDestination.Roommates
+                                },
                                 onShowPaymentDetection = { showPaymentDetection = true }
                             )
 
@@ -118,12 +136,11 @@ fun HomeScreen(
                                 onOpenDrawer = { scope.launch { drawerState.open() } }
                             )
 
-                            HomeDestination.Roommates -> EmptyFeatureScreen(
-                                destination = HomeDestination.Roommates,
-                                titleRes = R.string.home_no_roommates_yet,
-                                bodyRes = R.string.home_no_roommates_feature_body,
-                                actionRes = R.string.home_add_roommate,
-                                onOpenDrawer = { scope.launch { drawerState.open() } }
+                            HomeDestination.Roommates -> RoommatesScreen(
+                                roommates = uiState.roommateBalances,
+                                onBack = { selectedDestination = HomeDestination.Dashboard },
+                                onOpenDrawer = { scope.launch { drawerState.open() } },
+                                onAddRoommate = { activeRoute = HomeRoute.AddRoommate }
                             )
 
                             HomeDestination.Expenses -> EmptyFeatureScreen(
@@ -166,5 +183,5 @@ fun HomeScreen(
 }
 
 private enum class HomeRoute {
-    Main, AddExpense, CreateGroup
+    Main, AddExpense, CreateGroup, AddRoommate
 }

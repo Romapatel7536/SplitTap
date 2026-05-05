@@ -8,11 +8,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.roma.example.splittap.ui.auth.LoginScreen
+import com.roma.example.splittap.ui.auth.AuthScreen
+import com.roma.example.splittap.ui.auth.AuthViewModel
 import com.roma.example.splittap.ui.home.HomeScreen
+import com.roma.example.splittap.ui.home.HomeViewModel
 import com.roma.example.splittap.ui.theme.SplitTapTheme
-import com.roma.example.splittap.viewmodel.AuthViewModel
-import com.roma.example.splittap.viewmodel.HomeViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,11 +39,19 @@ class MainActivity : ComponentActivity() {
                         onRefreshHome = homeViewModel::loadHomeData
                     )
                 } else {
-                    LoginScreen(
+                    AuthScreen(
                         uiState = authUiState,
-                        onLoginClick = authViewModel::login,
-                        onRegisterClick = authViewModel::register,
-                        onForgotPasswordClick = authViewModel::resetPassword
+                        onFullNameChange = authViewModel::updateFullName,
+                        onContactChange = authViewModel::updateContact,
+                        onEmailChange = authViewModel::updateEmail,
+                        onPasswordChange = authViewModel::updatePassword,
+                        onConfirmPasswordChange = authViewModel::updateConfirmPassword,
+                        onTogglePasswordVisibility = authViewModel::togglePasswordVisibility,
+                        onLoginClick = authViewModel::submitLogin,
+                        onRegisterClick = authViewModel::submitRegister,
+                        onForgotPasswordClick = authViewModel::resetPasswordForCurrentEmail,
+                        onShowLogin = authViewModel::showLogin,
+                        onShowRegister = authViewModel::showRegister
                     )
                 }
             }

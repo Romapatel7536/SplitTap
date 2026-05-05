@@ -1,4 +1,4 @@
-package com.roma.example.splittap.viewmodel
+package com.roma.example.splittap.ui.home
 
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
@@ -11,6 +11,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 data class HomeUiState(
@@ -22,7 +23,14 @@ data class HomeUiState(
     val youOwe: Double = 0.0,
     val totalBalance: Double = 0.0,
     val recentExpenses: List<Expense> = emptyList(),
+    val roommateBalances: List<RoommateBalanceUi> = emptyList(),
     @StringRes val errorMessageRes: Int? = null
+)
+
+data class RoommateBalanceUi(
+    val uid: String = "",
+    val name: String = "",
+    val amount: Double = 0.0
 )
 
 class HomeViewModel(
@@ -31,7 +39,7 @@ class HomeViewModel(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
-    val uiState: StateFlow<HomeUiState> = _uiState
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     fun loadHomeData() {
         val user = auth.currentUser
@@ -77,6 +85,8 @@ class HomeViewModel(
         var youAreOwed = 0.0
         var youOwe = 0.0
 
+        val roommateBalanceMap = mutableMapOf<String, Double>()
+
         expenses.forEach { expense ->
             val totalPeople = expense.splitWithIds.size + 1
 
@@ -86,10 +96,34 @@ class HomeViewModel(
 
             if (expense.paidById == userId) {
                 youAreOwed += perPerson * expense.splitWithIds.size
+
+                expense.splitWithIds.forEach { roommateId ->
+                    roommateBalanceMap[roommateId] =
+                        (roommateBalanceMap[roommateId] ?: 0.0) + perPerson
+                }
+
             } else if (expense.splitWithIds.contains(userId)) {
                 youOwe += perPerson
+
+                roommateBalanceMap[expense.paidById] =
+                    (roommateBalanceMap[expense.paidById] ?: 0.0) - perPerson
             }
         }
+
+        val roommateIds = roommateBalanceMap.keys.toList()
+        val roommateProfiles = repository.getUsersByIds(roommateIds)
+
+        val roommateBalances = roommateBalanceMap.map { (uid, amount) ->
+            val roommateProfile = roommateProfiles.firstOrNull { it.uid == uid }
+
+            RoommateBalanceUi(
+                uid = uid,
+                name = roommateProfile?.name
+                    ?.ifBlank { roommateProfile.email }
+                    .orEmpty(),
+                amount = amount
+            )
+        }.sortedByDescending { kotlin.math.abs(it.amount) }
 
         HomeUiState(
             isLoading = false,
@@ -102,6 +136,7 @@ class HomeViewModel(
             recentExpenses = expenses
                 .sortedByDescending { it.createdAt }
                 .take(5),
+            roommateBalances = roommateBalances,
             errorMessageRes = null
         )
     }

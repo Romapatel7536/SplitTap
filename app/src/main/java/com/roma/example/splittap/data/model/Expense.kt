@@ -1,18 +1,11 @@
 package com.roma.example.splittap.data.model
 
 enum class ExpenseCategory {
-    Food,
-    Bills,
-    Dining,
-    Transport,
-    Shopping,
-    Entertainment,
-    Other
+    FOOD, BILLS, DINING, TRANSPORT, SHOPPING, ENTERTAINMENT, OTHER
 }
 
 enum class ExpenseSplitType {
-    Equal,
-    Custom
+    EQUAL, CUSTOM
 }
 
 data class Expense(
@@ -23,6 +16,6 @@ data class Expense(
     val paidById: String = "",
     val paidByEmail: String = "",
     val splitWithIds: List<String> = emptyList(),
-    val splitType: String = ExpenseSplitType.Equal.name,
+    val splitType: String = ExpenseSplitType.EQUAL.name,
     val createdAt: Long = System.currentTimeMillis()
 )
