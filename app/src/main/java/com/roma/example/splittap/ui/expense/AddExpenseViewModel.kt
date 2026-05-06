@@ -10,12 +10,10 @@ import com.roma.example.splittap.data.model.ExpenseCategory
 import com.roma.example.splittap.data.model.ExpenseSplitType
 import com.roma.example.splittap.data.repository.ExpenseRepository
 import com.roma.example.splittap.data.repository.UserRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 data class AddExpenseUiState(
     val description: String = "",
@@ -103,21 +101,15 @@ class AddExpenseViewModel(
 
         viewModelScope.launch {
             try {
-                val users = withContext(Dispatchers.IO) {
-                    userRepository.getAllUsersExcept(currentUser.uid)
-                }
+                val friends = userRepository.getFriends(currentUser.uid)
 
                 _uiState.value = _uiState.value.copy(
-                    members = users.map {
-                        SplitMemberUi(
-                            uid = it.uid,
-                            name = it.name.ifBlank { it.email }
-                        )
-                    }
+                    members = friends,
+                    errorMessageRes = null
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
-                    errorMessageRes = R.string.failed_to_load_roommates
+                    errorMessageRes = R.string.add_expense_load_members_error
                 )
             }
         }

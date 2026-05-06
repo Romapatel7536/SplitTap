@@ -94,6 +94,7 @@
     <string name="add_expense_saving">Saving…</string>
     <string name="add_expense_invalid_input">Enter an amount, description, and at least one roommate.</string>
     <string name="add_expense_save_error">Failed to save expense. Please try again.</string>
+    <string name="add_expense_load_members_error"> Failed to load members</string>
     <string name="add_expense_description">Description</string>
     <string name="add_expense_description_hint">e.g., Groceries</string>
     <string name="add_expense_amount">Amount</string>
@@ -199,6 +200,7 @@
     <string name="roommates_add_roommate">Add Roommate</string>
     <string name="roommates_owes_you">owes you</string>
     <string name="roommates_you_owe">you owe</string>
+    <string name="roommates_settled_up">settled up</string>
     <string name="roommates_empty_title">No roommates yet</string>
     <string name="roommates_empty_body">Invite roommates to split expenses and track balances together.</string>
     <string name="roommates_view_all_content_description">View all roommates</string>
@@ -206,6 +208,6 @@
     <string name="add_roommate_email_address">Email Address</string>
     <string name="add_roommate_email_hint">roommate@email.com</string>
     <string name="add_roommate_invitation_notice">Your roommate will receive an invitation to connect on SplitTap</string>
-    <string name="add_roommate_send_invitation">Send Invitation</string>
+    <string name="add_roommate_send_invitation">Add Roommate</string>
     <string name="failed_to_load_roommates">Failed to load roommates</string>
 </resources>
