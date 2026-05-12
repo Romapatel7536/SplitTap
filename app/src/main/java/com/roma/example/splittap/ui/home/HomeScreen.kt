@@ -1,5 +1,6 @@
 package com.roma.example.splittap.ui.home
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,7 +20,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.auth.FirebaseAuth
 import com.roma.example.splittap.R
+import com.roma.example.splittap.data.repository.UserRepository
 import com.roma.example.splittap.ui.expense.AddExpenseScreen
 import com.roma.example.splittap.ui.expense.AddExpenseViewModel
 import com.roma.example.splittap.ui.group.CreateGroupScreen
@@ -45,6 +48,7 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val addExpenseViewModel: AddExpenseViewModel = viewModel()
     val addUiState by addExpenseViewModel.uiState.collectAsState()
+    val userRepository = UserRepository()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -106,9 +110,29 @@ fun HomeScreen(
                         onEmailChange = { addRoommateEmail = it },
                         onBack = { activeRoute = HomeRoute.Main },
                         onSendInvitation = {
-                            addRoommateEmail = ""
-                            selectedDestination = HomeDestination.Roommates
-                            activeRoute = HomeRoute.Main
+                            val currentUser = FirebaseAuth.getInstance().currentUser
+                                ?: return@AddRoommateScreen
+
+                            scope.launch {
+                                val friend = userRepository.findUserByEmail(addRoommateEmail)
+
+                                if (friend != null) {
+                                    userRepository.addFriend(
+                                        currentUserId = currentUser.uid,
+                                        friend = friend
+                                    )
+
+                                    onRefreshHome()
+                                    addRoommateEmail = ""
+                                    selectedDestination = HomeDestination.Roommates
+                                    activeRoute = HomeRoute.Main
+                                } else {
+                                    // later we will show error in UI
+                                    Log.d("AddRoommate", "User not found")
+                                    Log.d("AddRoommate", "Entered: $addRoommateEmail")
+                                    Log.d("AddRoommate", "Found: ${friend?.email}")
+                                }
+                            }
                         }
                     )
 
@@ -138,6 +162,7 @@ fun HomeScreen(
 
                             HomeDestination.Roommates -> RoommatesScreen(
                                 roommates = uiState.roommateBalances,
+                                friends = uiState.friends,
                                 onBack = { selectedDestination = HomeDestination.Dashboard },
                                 onOpenDrawer = { scope.launch { drawerState.open() } },
                                 onAddRoommate = { activeRoute = HomeRoute.AddRoommate }

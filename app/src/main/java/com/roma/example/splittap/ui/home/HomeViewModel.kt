@@ -6,9 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.roma.example.splittap.R
 import com.roma.example.splittap.data.model.Expense
+import com.roma.example.splittap.data.model.UserProfile
 import com.roma.example.splittap.data.repository.HomeRepository
+import com.roma.example.splittap.ui.expense.SplitMemberUi
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,6 +27,7 @@ data class HomeUiState(
     val totalBalance: Double = 0.0,
     val recentExpenses: List<Expense> = emptyList(),
     val roommateBalances: List<RoommateBalanceUi> = emptyList(),
+    val friends: List<SplitMemberUi> = emptyList(),
     @StringRes val errorMessageRes: Int? = null
 )
 
@@ -40,6 +44,7 @@ class HomeViewModel(
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+    private var homeDataJob: Job? = null
 
     fun loadHomeData() {
         val user = auth.currentUser
@@ -52,17 +57,32 @@ class HomeViewModel(
             return
         }
 
-        viewModelScope.launch {
+        homeDataJob?.cancel()
+        homeDataJob = viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isLoading = true,
                 errorMessageRes = null
             )
 
             try {
-                _uiState.value = buildHomeState(
-                    userId = user.uid,
-                    email = user.email.orEmpty()
-                )
+                val userId = user.uid
+                val email = user.email.orEmpty()
+                val profileRequest = async { repository.getUserProfile(userId) }
+                val friendsRequest = async { repository.getFriends(userId) }
+                val profile = profileRequest.await()
+                val friends = friendsRequest.await()
+
+                repository.observeUserExpenses(userId).collect { expenses ->
+                    _uiState.value = buildHomeState(
+                        userId = userId,
+                        email = email,
+                        profile = profile,
+                        friends = friends,
+                        expenses = expenses
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
@@ -74,14 +94,11 @@ class HomeViewModel(
 
     private suspend fun buildHomeState(
         userId: String,
-        email: String
-    ): HomeUiState = coroutineScope {
-        val profileRequest = async { repository.getUserProfile(userId) }
-        val expensesRequest = async { repository.getUserExpenses(userId) }
-
-        val profile = profileRequest.await()
-        val expenses = expensesRequest.await()
-
+        email: String,
+        profile: UserProfile?,
+        friends: List<SplitMemberUi>,
+        expenses: List<Expense>
+    ): HomeUiState {
         var youAreOwed = 0.0
         var youOwe = 0.0
 
@@ -89,7 +106,6 @@ class HomeViewModel(
 
         expenses.forEach { expense ->
             val totalPeople = expense.splitWithIds.size + 1
-
             if (totalPeople <= 0) return@forEach
 
             val perPerson = expense.amount / totalPeople
@@ -101,7 +117,6 @@ class HomeViewModel(
                     roommateBalanceMap[roommateId] =
                         (roommateBalanceMap[roommateId] ?: 0.0) + perPerson
                 }
-
             } else if (expense.splitWithIds.contains(userId)) {
                 youOwe += perPerson
 
@@ -115,17 +130,18 @@ class HomeViewModel(
 
         val roommateBalances = roommateBalanceMap.map { (uid, amount) ->
             val roommateProfile = roommateProfiles.firstOrNull { it.uid == uid }
+            val friendProfile = friends.firstOrNull { it.uid == uid }
 
             RoommateBalanceUi(
                 uid = uid,
                 name = roommateProfile?.name
                     ?.ifBlank { roommateProfile.email }
-                    .orEmpty(),
+                    ?: friendProfile?.name.orEmpty(),
                 amount = amount
             )
         }.sortedByDescending { kotlin.math.abs(it.amount) }
 
-        HomeUiState(
+        return HomeUiState(
             isLoading = false,
             userName = profile?.name.orEmpty(),
             userContact = profile?.contact.orEmpty(),
@@ -137,7 +153,13 @@ class HomeViewModel(
                 .sortedByDescending { it.createdAt }
                 .take(5),
             roommateBalances = roommateBalances,
+            friends = friends,
             errorMessageRes = null
         )
+    }
+
+    override fun onCleared() {
+        homeDataJob?.cancel()
+        super.onCleared()
     }
 }

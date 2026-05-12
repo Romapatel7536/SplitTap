@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.roma.example.splittap.R
+import com.roma.example.splittap.ui.expense.SplitMemberUi
 import com.roma.example.splittap.ui.home.AppAccent
 import com.roma.example.splittap.ui.home.AppBackground
 import com.roma.example.splittap.ui.home.AppBorder
@@ -54,6 +55,7 @@ import kotlin.math.abs
 @Composable
 fun RoommatesScreen(
     roommates: List<RoommateBalanceUi>,
+    friends: List<SplitMemberUi>,
     onBack: () -> Unit,
     onOpenDrawer: () -> Unit,
     onAddRoommate: () -> Unit
@@ -81,38 +83,51 @@ fun RoommatesScreen(
                     .padding(horizontal = horizontalPadding)
                     .padding(top = 24.dp, bottom = 28.dp)
             ) {
-                Button(
-                    onClick = onAddRoommate,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(58.dp),
-                    shape = RoundedCornerShape(18.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AppPrimary)
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_add_24),
-                        contentDescription = null,
-                        tint = AppSurface,
-                        modifier = Modifier.size(22.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(R.string.roommates_add_roommate),
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                if (roommates.isEmpty()) {
+                if (friends.isEmpty()) {
                     RoommatesEmptyState(
                         onAddRoommate = onAddRoommate,
-                        modifier = Modifier.padding(top = 22.dp)
+                        modifier = Modifier.padding(top = 0.dp)
                     )
                 } else {
-                    roommates.forEach { roommate ->
+
+                    Button(
+                        onClick = onAddRoommate,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(58.dp),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = AppPrimary)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_add_24),
+                            contentDescription = null,
+                            tint = AppSurface,
+                            modifier = Modifier.size(22.dp)
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Text(
+                            text = stringResource(R.string.roommates_add_roommate),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    friends.forEach { friend ->
+
+                        val balance = roommates
+                            .firstOrNull { it.uid == friend.uid }
+                            ?.amount ?: 0.0
+
                         Spacer(modifier = Modifier.height(12.dp))
-                        RoommateBalanceRow(roommate = roommate)
+
+                        RoommateBalanceRow(
+                            roommate = RoommateBalanceUi(
+                                uid = friend.uid,
+                                name = friend.name,
+                                amount = balance
+                            )
+                        )
                     }
                 }
             }
@@ -186,8 +201,11 @@ private fun HeaderIconButton(
 
 @Composable
 private fun RoommateBalanceRow(roommate: RoommateBalanceUi) {
-    val isOwedToYou = roommate.amount > 0
-    val amountColor = if (isOwedToYou) AppSuccess else AppDanger
+    val amountColor = when {
+        roommate.amount > 0.0 -> AppSuccess
+        roommate.amount < 0.0 -> AppDanger
+        else -> AppMuted
+    }
     val name = roommate.name.ifBlank { stringResource(R.string.home_unknown_user) }
 
     Surface(
@@ -232,10 +250,10 @@ private fun RoommateBalanceRow(roommate: RoommateBalanceUi) {
 
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = if (isOwedToYou) {
-                        stringResource(R.string.roommates_owes_you)
-                    } else {
-                        stringResource(R.string.roommates_you_owe)
+                    text = when {
+                        roommate.amount > 0.0 -> stringResource(R.string.roommates_owes_you)
+                        roommate.amount < 0.0 -> stringResource(R.string.roommates_you_owe)
+                        else -> stringResource(R.string.roommates_settled_up)
                     },
                     color = amountColor,
                     style = MaterialTheme.typography.bodyMedium,
