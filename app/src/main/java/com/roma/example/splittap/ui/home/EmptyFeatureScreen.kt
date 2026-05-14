@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,36 +23,37 @@ fun EmptyFeatureScreen(
     @StringRes titleRes: Int,
     @StringRes bodyRes: Int,
     @StringRes actionRes: Int,
-    onOpenDrawer: () -> Unit
+    onBack: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(AppBackground)
     ) {
-        CompactHeader(
+        AppScreenTopBar(
             title = stringResource(destination.titleRes),
-            subtitle = stringResource(destination.subtitleRes),
-            onOpenDrawer = onOpenDrawer
+            onBack = onBack
         )
         Box(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .weight(1f)
                 .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
                 .background(AppBackground)
+                .navigationBarsPadding()
                 .padding(22.dp),
             contentAlignment = Alignment.Center
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .widthIn(max = 560.dp)
+                    .widthIn(max = 480.dp)
             ) {
                 EmptyStatePanel(
                     title = stringResource(titleRes),
                     body = stringResource(bodyRes),
                     action = stringResource(actionRes),
-                    onActionClick = { }
+                    onActionClick = onBack
                 )
             }
         }

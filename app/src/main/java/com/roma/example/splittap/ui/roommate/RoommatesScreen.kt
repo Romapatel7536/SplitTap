@@ -3,6 +3,7 @@ package com.roma.example.splittap.ui.roommate
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -11,26 +12,27 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,11 +45,16 @@ import com.roma.example.splittap.ui.home.AppAccent
 import com.roma.example.splittap.ui.home.AppBackground
 import com.roma.example.splittap.ui.home.AppBorder
 import com.roma.example.splittap.ui.home.AppDanger
+import com.roma.example.splittap.ui.home.AppGradientButton
+import com.roma.example.splittap.ui.home.AppInitialAvatar
 import com.roma.example.splittap.ui.home.AppInk
 import com.roma.example.splittap.ui.home.AppMuted
 import com.roma.example.splittap.ui.home.AppPrimary
+import com.roma.example.splittap.ui.home.AppScreenTopBar
+import com.roma.example.splittap.ui.home.AppSearchField
 import com.roma.example.splittap.ui.home.AppSuccess
 import com.roma.example.splittap.ui.home.AppSurface
+import com.roma.example.splittap.ui.home.AppUiTokens
 import com.roma.example.splittap.ui.home.RoommateBalanceUi
 import com.roma.example.splittap.ui.home.formatCurrency
 import kotlin.math.abs
@@ -57,76 +64,59 @@ fun RoommatesScreen(
     roommates: List<RoommateBalanceUi>,
     friends: List<SplitMemberUi>,
     onBack: () -> Unit,
-    onOpenDrawer: () -> Unit,
     onAddRoommate: () -> Unit
 ) {
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    val visibleFriends = friends.filter { friend ->
+        friend.name.contains(searchQuery, ignoreCase = true)
+    }
+
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .background(AppBackground)
     ) {
-        val horizontalPadding = if (maxWidth < 360.dp) 18.dp else 24.dp
+        val horizontalPadding = if (maxWidth < 360.dp) 20.dp else 24.dp
 
         Column(modifier = Modifier.fillMaxSize()) {
-            RoommatesHeader(
+            AppScreenTopBar(
+                title = stringResource(R.string.roommates_friends_title),
                 onBack = onBack,
-                onOpenDrawer = onOpenDrawer
+                trailing = if (friends.isEmpty()) {
+                    null
+                } else {
+                    { AddCircleButton(onClick = onAddRoommate) }
+                }
             )
 
             Column(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .fillMaxWidth()
-                    .widthIn(max = 560.dp)
                     .weight(1f)
+                    .widthIn(max = 480.dp)
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = horizontalPadding)
-                    .padding(top = 24.dp, bottom = 28.dp)
+                    .navigationBarsPadding()
+                    .padding(horizontal = horizontalPadding, vertical = 18.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 if (friends.isEmpty()) {
-                    RoommatesEmptyState(
-                        onAddRoommate = onAddRoommate,
-                        modifier = Modifier.padding(top = 0.dp)
-                    )
+                    RoommatesEmptyState(onAddRoommate = onAddRoommate)
                 } else {
+                    AppSearchField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = stringResource(R.string.roommates_search_people)
+                    )
 
-                    Button(
-                        onClick = onAddRoommate,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(58.dp),
-                        shape = RoundedCornerShape(18.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = AppPrimary)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_add_24),
-                            contentDescription = null,
-                            tint = AppSurface,
-                            modifier = Modifier.size(22.dp)
-                        )
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        Text(
-                            text = stringResource(R.string.roommates_add_roommate),
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    friends.forEach { friend ->
-
+                    visibleFriends.forEach { friend ->
                         val balance = roommates
                             .firstOrNull { it.uid == friend.uid }
                             ?.amount ?: 0.0
 
-                        Spacer(modifier = Modifier.height(12.dp))
-
                         RoommateBalanceRow(
-                            roommate = RoommateBalanceUi(
-                                uid = friend.uid,
-                                name = friend.name,
-                                amount = balance
-                            )
+                            friend = friend,
+                            balance = balance
                         )
                     }
                 }
@@ -136,136 +126,112 @@ fun RoommatesScreen(
 }
 
 @Composable
-private fun RoommatesHeader(
-    onBack: () -> Unit,
-    onOpenDrawer: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(150.dp)
-            .background(AppPrimary)
-            .statusBarsPadding()
-            .padding(horizontal = 24.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        HeaderIconButton(
-            iconRes = R.drawable.ic_chevron_right_24,
-            contentDescription = stringResource(R.string.home_cd_back),
-            onClick = onBack,
-            rotateBack = true
-        )
-
-        Spacer(modifier = Modifier.width(18.dp))
-
-        Text(
-            text = stringResource(R.string.roommates_title),
-            color = AppSurface,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1f)
-        )
-
-        HeaderIconButton(
-            iconRes = R.drawable.ic_menu_24,
-            contentDescription = stringResource(R.string.home_cd_open_menu),
-            onClick = onOpenDrawer
-        )
-    }
-}
-
-@Composable
-private fun HeaderIconButton(
-    iconRes: Int,
-    contentDescription: String,
-    onClick: () -> Unit,
-    rotateBack: Boolean = false
-) {
-    Box(
-        modifier = Modifier
-            .size(44.dp)
-            .clip(CircleShape)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            painter = painterResource(iconRes),
-            contentDescription = contentDescription,
-            tint = AppSurface,
-            modifier = Modifier
-                .size(26.dp)
-                .rotate(if (rotateBack) 180f else 0f)
-        )
-    }
-}
-
-@Composable
-private fun RoommateBalanceRow(roommate: RoommateBalanceUi) {
-    val amountColor = when {
-        roommate.amount > 0.0 -> AppSuccess
-        roommate.amount < 0.0 -> AppDanger
-        else -> AppMuted
-    }
-    val name = roommate.name.ifBlank { stringResource(R.string.home_unknown_user) }
-
+private fun AddCircleButton(onClick: () -> Unit) {
     Surface(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(108.dp),
-        shape = RoundedCornerShape(24.dp),
+            .size(48.dp)
+            .clip(CircleShape)
+            .clickable(onClick = onClick),
+        shape = CircleShape,
+        color = AppPrimary
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                painter = painterResource(R.drawable.ic_add_24),
+                contentDescription = stringResource(R.string.roommates_add_person),
+                tint = AppSurface,
+                modifier = Modifier.size(26.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun RoommateBalanceRow(
+    friend: SplitMemberUi,
+    balance: Double
+) {
+    val amountColor = when {
+        balance > 0.0 -> AppSuccess
+        balance < 0.0 -> AppDanger
+        else -> AppMuted
+    }
+    val name = friend.name.ifBlank { stringResource(R.string.home_unknown_user) }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(AppUiTokens.CardCorner),
         color = AppSurface,
-        border = BorderStroke(1.dp, AppBorder)
+        border = BorderStroke(1.dp, AppBorder),
+        shadowElevation = 2.dp
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 22.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(AppAccent),
-                contentAlignment = Alignment.Center
-            ) {
+            AppInitialAvatar(name = name, size = AppUiTokens.AvatarMedium)
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = name.firstOrNull()?.uppercase()
-                        ?: stringResource(R.string.home_roommate_initial),
-                    color = AppPrimary,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    text = name,
+                    color = AppInk,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
+
+                Spacer(modifier = Modifier.height(5.dp))
+
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = AppAccent
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_dashboard_24),
+                            contentDescription = null,
+                            tint = AppPrimary,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(R.string.add_roommate_type_roommate),
+                            color = AppPrimary,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Text(
-                text = name,
-                color = AppInk,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Spacer(modifier = Modifier.width(10.dp))
 
             Column(horizontalAlignment = Alignment.End) {
                 Text(
                     text = when {
-                        roommate.amount > 0.0 -> stringResource(R.string.roommates_owes_you)
-                        roommate.amount < 0.0 -> stringResource(R.string.roommates_you_owe)
+                        balance > 0.0 -> stringResource(R.string.roommates_owes_you)
+                        balance < 0.0 -> stringResource(R.string.roommates_you_owe)
                         else -> stringResource(R.string.roommates_settled_up)
                     },
                     color = amountColor,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
                 )
 
-                Text(
-                    text = formatCurrency(abs(roommate.amount)),
-                    color = amountColor,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
+                if (balance != 0.0) {
+                    Text(
+                        text = formatCurrency(abs(balance)),
+                        color = amountColor,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }
@@ -273,22 +239,22 @@ private fun RoommateBalanceRow(roommate: RoommateBalanceUi) {
 
 @Composable
 private fun RoommatesEmptyState(
-    onAddRoommate: () -> Unit,
-    modifier: Modifier = Modifier
+    onAddRoommate: () -> Unit
 ) {
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         color = AppSurface,
-        border = BorderStroke(1.dp, AppBorder)
+        border = BorderStroke(1.dp, AppBorder),
+        shadowElevation = 2.dp
     ) {
         Column(
-            modifier = Modifier.padding(28.dp),
+            modifier = Modifier.padding(22.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
                 modifier = Modifier
-                    .size(78.dp)
+                    .size(74.dp)
                     .clip(CircleShape)
                     .background(AppAccent),
                 contentAlignment = Alignment.Center
@@ -301,17 +267,17 @@ private fun RoommatesEmptyState(
                 )
             }
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = stringResource(R.string.roommates_empty_title),
                 color = AppInk,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Text(
                 text = stringResource(R.string.roommates_empty_body),
@@ -322,16 +288,11 @@ private fun RoommatesEmptyState(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            Button(
+            AppGradientButton(
+                text = stringResource(R.string.roommates_add_person),
                 onClick = onAddRoommate,
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = AppPrimary)
-            ) {
-                Text(
-                    text = stringResource(R.string.roommates_add_roommate),
-                    fontWeight = FontWeight.Bold
-                )
-            }
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
