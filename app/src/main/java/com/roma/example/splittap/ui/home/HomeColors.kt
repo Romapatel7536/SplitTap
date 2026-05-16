@@ -26,6 +26,12 @@ val AppPrimary: Color
 val AppPrimaryDark: Color
     @Composable get() = colorResource(R.color.home_primary_dark)
 
+val AppGradientStart: Color
+    @Composable get() = colorResource(R.color.home_gradient_start)
+
+val AppGradientEnd: Color
+    @Composable get() = colorResource(R.color.home_gradient_end)
+
 val AppAccent: Color
     @Composable get() = colorResource(R.color.home_accent)
 
@@ -34,6 +40,15 @@ val AppSuccess: Color
 
 val AppDanger: Color
     @Composable get() = colorResource(R.color.home_danger)
+
+val AppWarning: Color
+    @Composable get() = colorResource(R.color.home_warning)
+
+val AppIconBlue: Color
+    @Composable get() = colorResource(R.color.home_icon_blue)
+
+val AppMutedOnGradient: Color
+    @Composable get() = colorResource(R.color.home_muted_on_gradient)
 
 val AppScrim: Color
     @Composable get() = colorResource(R.color.home_scrim)

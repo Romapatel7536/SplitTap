@@ -15,6 +15,7 @@
     <string name="home_settings_subtitle">Account and preferences</string>
 
     <string name="home_dashboard_header_subtitle">Your SplitTap overview</string>
+    <string name="home_welcome_back">Welcome back,</string>
     <string name="home_total_balance">Total Balance</string>
     <string name="home_zero_balance">$0.00</string>
     <string name="home_no_shared_expenses">No shared expenses yet</string>
@@ -29,6 +30,20 @@
     <string name="home_add_roommate_caption">Invite by email</string>
     <string name="home_payment_alert">Payment alert</string>
     <string name="home_payment_alert_caption">Preview prompt</string>
+    <string name="home_settle_up">Settle Up</string>
+    <string name="home_roommates_friends_title">Roommates &amp; Friends</string>
+    <string name="home_roommates_friends_body">Manage people you split with</string>
+    <string name="home_active_groups">Active Groups</string>
+    <string name="home_recent_expenses">Recent Expenses</string>
+    <string name="home_see_all">See all</string>
+    <string name="home_no_active_groups">No active groups yet</string>
+    <string name="home_no_active_groups_body">Create a group when you are ready to split expenses together.</string>
+    <string name="home_no_recent_expenses">No recent expenses yet</string>
+    <string name="home_no_recent_expenses_body">Add your first shared payment to see it here.</string>
+    <string name="home_unknown_expense">Shared expense</string>
+    <string name="home_paid_by_format">Paid by %1$s</string>
+    <string name="home_today">Today</string>
+    <string name="home_yesterday">Yesterday</string>
     <string name="home_no_roommates_yet">No roommates yet</string>
     <string name="home_no_roommates_body">Add roommates and create your first group to begin tracking balances.</string>
     <string name="home_add_first_roommate">Add your first roommate</string>
@@ -61,10 +76,7 @@
     <string name="home_privacy_policy_caption">Policy placeholder</string>
     <string name="home_logout">Log Out</string>
 
-    <string name="home_drawer_app_title">SplitTap</string>
     <string name="home_signed_in_fallback">Signed in</string>
-    <string name="home_next_feature">Next feature</string>
-    <string name="home_next_feature_body">Connect groups, roommates, and expenses to Firestore.</string>
 
     <string name="home_payment_detected">Payment Detected</string>
     <string name="home_payment_detected_body">When notification access is connected, payment details will appear here instantly.</string>
@@ -73,8 +85,8 @@
     <string name="home_remind_later">Remind Later</string>
     <string name="home_ignore">Ignore</string>
 
-    <string name="home_cd_open_menu">Open menu</string>
-    <string name="home_cd_close_menu">Close menu</string>
+    <string name="home_cd_notifications">Open notifications</string>
+    <string name="home_cd_open_profile_menu">Open profile</string>
     <string name="home_cd_app_mark">SplitTap app mark</string>
     <string name="home_cd_empty_illustration">Empty state illustration</string>
     <string name="home_cd_payment_icon">Payment icon</string>
@@ -96,7 +108,9 @@
     <string name="add_expense_save_error">Failed to save expense. Please try again.</string>
     <string name="add_expense_load_members_error"> Failed to load members</string>
     <string name="add_expense_description">Description</string>
+    <string name="add_expense_expense_title">Expense Title</string>
     <string name="add_expense_description_hint">e.g., Groceries</string>
+    <string name="add_expense_title_hint">e.g., Walmart Groceries</string>
     <string name="add_expense_amount">Amount</string>
     <string name="add_expense_amount_hint">0.00</string>
     <string name="add_expense_amount_format">$%1$.2f</string>
@@ -113,11 +127,30 @@
     <string name="add_expense_you">You</string>
     <string name="add_expense_paid_by_caption">This expense will be saved under your account</string>
     <string name="add_expense_split_with">Split With</string>
+    <string name="add_expense_participants">Participants</string>
+    <string name="add_expense_notes_optional">Notes (Optional)</string>
+    <string name="add_expense_notes_hint">Add any additional details...</string>
+    <string name="add_expense_paid_by_split">Paid by you and split</string>
+    <string name="add_expense_equally">Equally</string>
+    <string name="add_expense_no_friends_title">No friends added yet</string>
+    <string name="add_expense_no_friends_body">Add a roommate or friend before saving a split expense.</string>
     <string name="add_expense_split_type">Split Type</string>
     <string name="add_expense_equal_split">Equal Split</string>
     <string name="add_expense_equal_split_caption">Everyone pays the same share</string>
     <string name="add_expense_custom_split">Custom Split</string>
     <string name="add_expense_custom_split_caption">Set different shares later</string>
+    <string name="split_options_title">Split Options</string>
+    <string name="split_options_close">Close split options</string>
+    <string name="split_options_done">Done</string>
+    <string name="split_options_total_amount">Total Amount</string>
+    <string name="split_options_paid_by_you">Paid by You</string>
+    <string name="split_options_equal">Equal</string>
+    <string name="split_options_exact">Exact</string>
+    <string name="split_options_percent" formatted="false">%</string>
+    <string name="split_options_shares">Shares</string>
+    <string name="split_options_adjustment">Adjustment</string>
+    <string name="split_options_total_allocated">Total Allocated</string>
+    <string name="split_options_remaining">Remaining</string>
 
     <!-- Create Group screen strings -->
     <string name="create_group_title">Create Group</string>
@@ -125,8 +158,13 @@
     <string name="create_group_save">Create Group</string>
     <string name="create_group_name">Group Name</string>
     <string name="create_group_name_hint">e.g., Apartment Group</string>
+    <string name="create_group_name_modern_hint">e.g., Apartment 4B, Road Trip 2026</string>
+    <string name="create_group_category_optional">Category (Optional)</string>
     <string name="create_group_description">Description</string>
+    <string name="create_group_description_optional">Description (Optional)</string>
     <string name="create_group_description_hint">Optional note about this group</string>
+    <string name="create_group_description_modern_hint">Add a description for this group...</string>
+    <string name="create_group_continue">Continue</string>
     <string name="create_group_add_members">Add Members</string>
     <string name="create_group_member_email_hint">Enter email address</string>
     <string name="create_group_add_another_member">Add Another Member</string>
@@ -135,6 +173,8 @@
     <string name="create_group_home">Home</string>
     <string name="create_group_trip">Trip</string>
     <string name="create_group_couple">Couple</string>
+    <string name="create_group_event">Event</string>
+    <string name="create_group_office">Office</string>
     <string name="create_group_other">Other</string>
     <string name="create_group_hero_title">Split together</string>
     <string name="create_group_hero_body">Invite roommates and track expenses in one shared place.</string>
@@ -149,9 +189,9 @@
     <string name="auth_minimum_password">Minimum 8 characters</string>
     <string name="auth_sign_up_title">Sign up</string>
     <string name="auth_log_in_title">Log in</string>
-    <string name="auth_full_name">Full name</string>
-    <string name="auth_contact_number">Contact number</string>
-    <string name="auth_email_address">Email address</string>
+    <string name="auth_full_name">Full Name</string>
+    <string name="auth_contact_number">Contact Number</string>
+    <string name="auth_email_address">Email</string>
     <string name="auth_password">Password</string>
     <string name="auth_hide_password">Hide</string>
     <string name="auth_show_password">Show</string>
@@ -161,21 +201,28 @@
     <string name="auth_new_to_splittap">New to SplitTap? Sign up</string>
     <string name="auth_logo_letter">S</string>
     <string name="auth_back">Back</string>
-    <string name="auth_create_account">Create account</string>
-    <string name="auth_login_headline">Welcome back</string>
-    <string name="auth_login_subtitle">Log in to your account</string>
-    <string name="auth_register_headline">Create account</string>
-    <string name="auth_register_subtitle">Join SplitTap to start splitting expenses</string>
-    <string name="auth_email_hint">your@email.com</string>
-    <string name="auth_name_hint">Your name</string>
+    <string name="auth_create_account">Create Account</string>
+    <string name="auth_login_headline">Welcome Back</string>
+    <string name="auth_login_subtitle">Sign in to continue</string>
+    <string name="auth_register_headline">Create Account</string>
+    <string name="auth_register_subtitle">Join SplitTap today</string>
+    <string name="auth_email_hint">you@example.com</string>
+    <string name="auth_name_hint">John Doe</string>
     <string name="auth_contact_hint">Your contact number</string>
     <string name="auth_password_hint">Enter your password</string>
-    <string name="auth_password_create_hint">Create a password</string>
+    <string name="auth_password_create_hint">Create a strong password</string>
     <string name="auth_confirm_password">Confirm password</string>
     <string name="auth_confirm_password_hint">Confirm your password</string>
     <string name="auth_forgot_password_short">Forgot password?</string>
     <string name="auth_log_in_button">Log In</string>
     <string name="auth_sign_up_button">Sign Up</string>
+    <string name="auth_sign_in_button">Sign In</string>
+    <string name="auth_remember_me">Remember me</string>
+    <string name="auth_dont_have_account">Don\'t have an account?</string>
+    <string name="auth_already_have_account_prompt">Already have an account?</string>
+    <string name="auth_sign_up_link">Sign Up</string>
+    <string name="auth_sign_in_link">Sign In</string>
+    <string name="auth_cd_logo">SplitTap logo</string>
     <string name="auth_confirm_password_required">Confirm your password</string>
     <string name="auth_passwords_do_not_match">Passwords do not match</string>
 
@@ -197,7 +244,10 @@
 
     <!-- Roommates -->
     <string name="roommates_title">Roommates</string>
+    <string name="roommates_friends_title">Roommates &amp; Friends</string>
     <string name="roommates_add_roommate">Add Roommate</string>
+    <string name="roommates_add_person">Add Person</string>
+    <string name="roommates_search_people">Search people...</string>
     <string name="roommates_owes_you">owes you</string>
     <string name="roommates_you_owe">you owe</string>
     <string name="roommates_settled_up">settled up</string>
@@ -205,9 +255,141 @@
     <string name="roommates_empty_body">Invite roommates to split expenses and track balances together.</string>
     <string name="roommates_view_all_content_description">View all roommates</string>
     <string name="add_roommate_title">Add Roommate</string>
+    <string name="add_roommate_friend_title">Add Roommate/Friend</string>
+    <string name="add_roommate_type">Type</string>
+    <string name="add_roommate_type_roommate">Roommate</string>
+    <string name="add_roommate_type_friend">Friend</string>
+    <string name="add_roommate_name">Name</string>
+    <string name="add_roommate_name_hint">Enter name</string>
     <string name="add_roommate_email_address">Email Address</string>
+    <string name="add_roommate_email">Email</string>
     <string name="add_roommate_email_hint">roommate@email.com</string>
+    <string name="add_roommate_email_modern_hint">email@example.com</string>
+    <string name="add_roommate_phone_optional">Phone (Optional)</string>
+    <string name="add_roommate_phone_hint">+1 (555) 123-4567</string>
+    <string name="add_roommate_roommate_explainer">Roommates are people you live with and share household expenses.</string>
+    <string name="add_roommate_friend_explainer">Friends are people you occasionally split costs with like trips or meals.</string>
     <string name="add_roommate_invitation_notice">Your roommate will receive an invitation to connect on SplitTap</string>
     <string name="add_roommate_send_invitation">Add Roommate</string>
     <string name="failed_to_load_roommates">Failed to load roommates</string>
+
+    <!-- Groups -->
+    <string name="groups_create_new_group">Create New Group</string>
+
+    <!-- Expenses -->
+    <string name="expenses_title">All Expenses</string>
+    <string name="expenses_total_count">%1$d total expenses</string>
+    <string name="expenses_cd_filter">Filter expenses</string>
+    <string name="expenses_individual_group">Individual split</string>
+
+    <!-- Settlement -->
+    <string name="settle_title">Settle Up</string>
+    <string name="settle_net_balance">Net Balance</string>
+    <string name="settle_total_to_pay">Total to pay</string>
+    <string name="settle_total_to_receive">Total to receive</string>
+    <string name="settle_payments_you_owe">Payments You Owe</string>
+    <string name="settle_payments_you_receive">Payments You\'ll Receive</string>
+    <string name="settle_with_person">Settle with %1$s</string>
+    <string name="settle_waiting_for_payment">Waiting for payment</string>
+    <string name="settle_no_payments_to_make">No payments to make right now.</string>
+    <string name="settle_no_payments_to_receive">No incoming payments right now.</string>
+
+    <!-- Profile and Settings -->
+    <string name="settings_profile_title">Profile</string>
+    <string name="settings_edit_profile">Edit Profile</string>
+    <string name="settings_personal_information">Personal Information</string>
+    <string name="settings_payment_detection">Payment Detection</string>
+    <string name="settings_payment_methods">Payment Methods</string>
+    <string name="settings_privacy_security">Privacy &amp; Security</string>
+    <string name="settings_help_support">Help &amp; Support</string>
+    <string name="settings_groups_count_label">Groups</string>
+    <string name="settings_roommates_count_label">Roommates</string>
+    <string name="settings_expenses_count_label">Expenses</string>
+    <string name="settings_app_version">SplitTap v1.0.0</string>
+    <string name="settings_full_name">Full Name</string>
+    <string name="settings_email">Email</string>
+    <string name="settings_phone">Phone</string>
+    <string name="settings_location">Location</string>
+    <string name="settings_location_placeholder">Canada</string>
+    <string name="settings_save_changes">Save Changes</string>
+    <string name="settings_new_expenses">New Expenses</string>
+    <string name="settings_new_expenses_body">Get notified when expenses are added</string>
+    <string name="settings_payment_requests">Payment Requests</string>
+    <string name="settings_payment_requests_body">Get notified when someone requests payment</string>
+    <string name="settings_payment_received">Payment Received</string>
+    <string name="settings_payment_received_body">Get notified when you receive a payment</string>
+    <string name="settings_group_invites">Group Invites</string>
+    <string name="settings_group_invites_body">Get notified when added to a group</string>
+    <string name="settings_expense_comments">Expense Comments</string>
+    <string name="settings_expense_comments_body">Get notified of comments on expenses</string>
+    <string name="settings_weekly_summary">Weekly Summary</string>
+    <string name="settings_weekly_summary_body">Receive a weekly expense summary</string>
+    <string name="settings_smart_payment_detection">Smart Payment Detection</string>
+    <string name="settings_smart_payment_detection_body">SplitTap can detect payment notifications and ask if you would like to add them as expenses.</string>
+    <string name="settings_enable_payment_detection">Enable Payment Detection</string>
+    <string name="settings_enable_payment_detection_body">Scan notifications for payments</string>
+    <string name="settings_auto_suggest_group">Auto-Suggest Group</string>
+    <string name="settings_auto_suggest_group_body">Suggest groups based on payment</string>
+    <string name="settings_permission_note">Note: This feature requires notification access permission.</string>
+    <string name="settings_grant_permission">Grant Permission</string>
+    <string name="settings_add_payment_method">Add Payment Method</string>
+    <string name="settings_visa">Visa</string>
+    <string name="settings_mastercard">Mastercard</string>
+    <string name="settings_visa_digits">•••• 4242</string>
+    <string name="settings_mastercard_digits">•••• 8888</string>
+    <string name="settings_default">Default</string>
+    <string name="settings_edit">Edit</string>
+    <string name="settings_remove">Remove</string>
+    <string name="settings_change_password">Change Password</string>
+    <string name="settings_biometric_lock">Biometric Lock</string>
+    <string name="settings_biometric_lock_body">Use fingerprint to unlock app</string>
+    <string name="settings_show_balance_home">Show Balance on Home</string>
+    <string name="settings_show_balance_home_body">Display your balance on home screen</string>
+    <string name="settings_two_factor">Two-Factor Authentication</string>
+    <string name="settings_data_safe_title">Your Data is Safe</string>
+    <string name="settings_data_safe_body">We use bank-level encryption to protect your information.</string>
+    <string name="settings_live_chat">Live Chat</string>
+    <string name="settings_live_chat_body">Chat with our support team</string>
+    <string name="settings_email_support">Email Support</string>
+    <string name="settings_support_email">support@splittap.com</string>
+    <string name="settings_phone_support">Phone Support</string>
+    <string name="settings_support_phone">+1 (800) 123-4567</string>
+    <string name="settings_help_center_body">Browse articles and guides</string>
+    <string name="settings_faq_title">Frequently Asked Questions</string>
+    <string name="settings_faq_icon">?</string>
+    <string name="settings_faq_split_question">How do I split an expense?</string>
+    <string name="settings_faq_split_answer">Click Add Expense, enter details, and select participants.</string>
+    <string name="settings_faq_settle_question">How do I settle up?</string>
+    <string name="settings_faq_settle_answer">Go to Settlement Summary and choose who to pay.</string>
+    <string name="settings_faq_edit_question">Can I edit an expense?</string>
+    <string name="settings_faq_edit_answer">Yes, tap any expense and click Edit.</string>
+
+    <!-- Payment Detection Sheet -->
+    <string name="payment_sheet_spent_at">You spent at</string>
+    <string name="payment_sheet_store">Walmart</string>
+    <string name="payment_sheet_time">2 minutes ago</string>
+    <string name="payment_sheet_amount">Amount</string>
+    <string name="payment_sheet_sample_amount">$24.50</string>
+    <string name="payment_sheet_question">Would you like to add this to SplitTap?</string>
+    <string name="payment_sheet_dismiss">Dismiss</string>
+    <string name="payment_sheet_footer">SplitTap detected this transaction from your notification. You can disable this feature in Settings.</string>
+
+    <!-- Get Started and Onboarding -->
+    <string name="onboarding_get_started">Get Started</string>
+    <string name="onboarding_login">Log In</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_app_tagline">Split expenses effortlessly with roommates and friends.</string>
+    <string name="onboarding_track_title">Track Shared Expenses Easily</string>
+    <string name="onboarding_track_body">Split groceries, rent, bills, and daily costs with roommates and friends.</string>
+    <string name="onboarding_groups_title">Create Groups</string>
+    <string name="onboarding_groups_body">Create apartment, house, or trip groups and manage shared expenses.</string>
+    <string name="onboarding_roommates_title">Add Roommates &amp; Friends</string>
+    <string name="onboarding_roommates_body">Add people you split with often and include them quickly.</string>
+    <string name="onboarding_balances_title">See Who Owes Whom</string>
+    <string name="onboarding_balances_body">Automatically calculate balances and settlements.</string>
+    <string name="onboarding_cd_logo">SplitTap logo</string>
+    <string name="onboarding_cd_groups">Groups illustration</string>
+    <string name="onboarding_cd_trending">Balance trend illustration</string>
+    <string name="onboarding_cd_slide_icon">Onboarding illustration</string>
 </resources>

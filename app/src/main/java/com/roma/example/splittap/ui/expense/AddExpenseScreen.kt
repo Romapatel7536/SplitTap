@@ -3,10 +3,8 @@ package com.roma.example.splittap.ui.expense
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -22,18 +21,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,23 +35,33 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.roma.example.splittap.R
 import com.roma.example.splittap.data.model.ExpenseCategory
 import com.roma.example.splittap.data.model.ExpenseSplitType
 import com.roma.example.splittap.ui.home.AppBackground
 import com.roma.example.splittap.ui.home.AppBorder
+import com.roma.example.splittap.ui.home.AppCheckIndicator
 import com.roma.example.splittap.ui.home.AppDanger
+import com.roma.example.splittap.ui.home.AppDropdownList
+import com.roma.example.splittap.ui.home.AppDropdownOption
+import com.roma.example.splittap.ui.home.AppFieldLabel
+import com.roma.example.splittap.ui.home.AppFormField
+import com.roma.example.splittap.ui.home.AppGradientButton
+import com.roma.example.splittap.ui.home.AppInitialAvatar
 import com.roma.example.splittap.ui.home.AppInk
 import com.roma.example.splittap.ui.home.AppMuted
 import com.roma.example.splittap.ui.home.AppPrimary
+import com.roma.example.splittap.ui.home.AppScreenTopBar
+import com.roma.example.splittap.ui.home.AppSelectionField
 import com.roma.example.splittap.ui.home.AppSurface
+import com.roma.example.splittap.ui.home.AppUiTokens
 
 private data class ExpenseCategoryOption(
     @StringRes val titleRes: Int,
@@ -79,13 +83,18 @@ fun AddExpenseScreen(
 ) {
     var description by rememberSaveable { mutableStateOf("") }
     var amount by rememberSaveable { mutableStateOf("") }
+    var notes by rememberSaveable { mutableStateOf("") }
     var selectedCategoryName by rememberSaveable { mutableStateOf(ExpenseCategory.FOOD.name) }
-    var splitTypeName by rememberSaveable { mutableStateOf(ExpenseSplitType.EQUAL.name) }
+    var selectedSplitOptionName by rememberSaveable { mutableStateOf(SplitOption.Equal.name) }
     var selectedRoommateIdsText by rememberSaveable { mutableStateOf("") }
-    val selectedCategory = ExpenseCategory.valueOf(selectedCategoryName)
-    val splitType = ExpenseSplitType.valueOf(splitTypeName)
-    val selectedRoommateIds = selectedRoommateIdsText.toIdList()
+    var categoryOptionsVisible by rememberSaveable { mutableStateOf(false) }
+    var didAutoSelectMembers by rememberSaveable { mutableStateOf(false) }
+    var showSplitOptions by rememberSaveable { mutableStateOf(false) }
 
+    val selectedCategory = ExpenseCategory.valueOf(selectedCategoryName)
+    val selectedSplitOption = SplitOption.valueOf(selectedSplitOptionName)
+    val splitType = selectedSplitOption.toExpenseSplitType()
+    val selectedRoommateIds = selectedRoommateIdsText.toIdList()
     val canSubmit = !uiState.isSaving
 
     val categories = remember {
@@ -93,127 +102,120 @@ fun AddExpenseScreen(
             ExpenseCategoryOption(R.string.add_expense_category_food, ExpenseCategory.FOOD),
             ExpenseCategoryOption(R.string.add_expense_category_bills, ExpenseCategory.BILLS),
             ExpenseCategoryOption(R.string.add_expense_category_dining, ExpenseCategory.DINING),
-            ExpenseCategoryOption(
-                R.string.add_expense_category_transport,
-                ExpenseCategory.TRANSPORT
-            ),
-            ExpenseCategoryOption(
-                R.string.add_expense_category_shopping,
-                ExpenseCategory.SHOPPING
-            ),
-            ExpenseCategoryOption(
-                R.string.add_expense_category_entertainment,
-                ExpenseCategory.ENTERTAINMENT
-            ),
+            ExpenseCategoryOption(R.string.add_expense_category_transport, ExpenseCategory.TRANSPORT),
+            ExpenseCategoryOption(R.string.add_expense_category_shopping, ExpenseCategory.SHOPPING),
+            ExpenseCategoryOption(R.string.add_expense_category_entertainment, ExpenseCategory.ENTERTAINMENT),
             ExpenseCategoryOption(R.string.add_expense_category_other, ExpenseCategory.OTHER)
         )
     }
 
-    fun toggleRoommate(uid: String) {
-        val currentIds = selectedRoommateIdsText.toIdList()
-
-        selectedRoommateIdsText = if (currentIds.contains(uid)) {
-            (currentIds - uid).joinToString(",")
-        } else {
-            (currentIds + uid).joinToString(",")
+    LaunchedEffect(members) {
+        if (!didAutoSelectMembers && members.isNotEmpty() && selectedRoommateIdsText.isBlank()) {
+            selectedRoommateIdsText = members.joinToString(IdSeparator) { it.uid }
+            didAutoSelectMembers = true
         }
     }
 
-    Scaffold(
-        containerColor = AppBackground,
-        bottomBar = {
-            AddExpenseBottomBar(
-                canSubmit = canSubmit,
-                isSaving = uiState.isSaving,
-                onSave = {
-                    onSaveExpense(
-                        description,
-                        amount.toDoubleOrNull(),
-                        selectedCategory,
-                        splitType,
-                        selectedRoommateIds
-                    )
-                }
+    fun toggleRoommate(uid: String) {
+        selectedRoommateIdsText = selectedRoommateIdsText.toIdList()
+            .toggle(uid)
+            .joinToString(IdSeparator)
+    }
+
+    if (showSplitOptions) {
+        SplitOptionsScreen(
+            amount = amount.toDoubleOrNull(),
+            members = members,
+            selectedRoommateIds = selectedRoommateIds,
+            selectedOption = selectedSplitOption,
+            onOptionSelected = { selectedSplitOptionName = it.name },
+            onClose = { showSplitOptions = false },
+            onDone = { showSplitOptions = false }
+        )
+        return
+    }
+
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppBackground)
+    ) {
+        val horizontalPadding = if (maxWidth < 360.dp) 20.dp else 24.dp
+
+        Column(modifier = Modifier.fillMaxSize()) {
+            AppScreenTopBar(
+                title = stringResource(R.string.add_expense_title),
+                onBack = onBack
             )
-        }
-    ) { innerPadding ->
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .background(AppBackground)
-        ) {
-            val horizontalPadding = if (maxWidth < 360.dp) 20.dp else 24.dp
 
             Column(
                 modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .fillMaxSize()
-                    .widthIn(max = 560.dp)
+                    .align(Alignment.CenterHorizontally)
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .widthIn(max = 480.dp)
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = horizontalPadding)
-                    .padding(top = 32.dp, bottom = 28.dp)
+                    .navigationBarsPadding()
+                    .imePadding()
+                    .padding(horizontal = horizontalPadding, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                FlatTopBar(
-                    title = stringResource(R.string.add_expense_title),
-                    onBack = onBack
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                FormTextField(
-                    label = stringResource(R.string.add_expense_description),
+                AppFormField(
+                    label = stringResource(R.string.add_expense_expense_title),
                     value = description,
                     onValueChange = { description = it },
-                    placeholder = stringResource(R.string.add_expense_description_hint)
+                    placeholder = stringResource(R.string.add_expense_title_hint),
+                    iconRes = R.drawable.ic_receipt_24
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                FormTextField(
+                AppFormField(
                     label = stringResource(R.string.add_expense_amount),
                     value = amount,
                     onValueChange = { amount = it },
                     placeholder = stringResource(R.string.add_expense_amount_hint),
+                    iconRes = R.drawable.ic_dollar_24,
                     keyboardType = KeyboardType.Decimal
                 )
 
-                Spacer(modifier = Modifier.height(28.dp))
-
-                FormSectionLabel(text = stringResource(R.string.add_expense_category))
-                CategoryGrid(
+                CategorySelector(
                     categories = categories,
-                    selectedCategory = categories.first { it.code == selectedCategory },
-                    onCategorySelected = { selectedCategoryName = it.code.name }
+                    selectedCategory = selectedCategory,
+                    optionsVisible = categoryOptionsVisible,
+                    onToggleOptions = { categoryOptionsVisible = !categoryOptionsVisible },
+                    onCategorySelected = {
+                        selectedCategoryName = it.code.name
+                        categoryOptionsVisible = false
+                    }
                 )
 
-                Spacer(modifier = Modifier.height(28.dp))
+                AppSelectionField(
+                    label = stringResource(R.string.add_expense_paid_by),
+                    title = stringResource(R.string.add_expense_you),
+                    iconRes = R.drawable.ic_person_24
+                )
 
-                FormSectionLabel(text = stringResource(R.string.add_expense_paid_by))
-                PaidBySelector()
+                SplitTypeCard(
+                    splitOption = selectedSplitOption,
+                    onClick = { showSplitOptions = true }
+                )
 
-                Spacer(modifier = Modifier.height(28.dp))
+                ParticipantsSection(
+                    members = members,
+                    selectedRoommateIds = selectedRoommateIds,
+                    onToggleRoommate = ::toggleRoommate
+                )
 
-                FormSectionLabel(text = stringResource(R.string.add_expense_split_with))
-
-                members.forEach { member ->
-                    SplitWithRow(
-                        name = member.name,
-                        selected = selectedRoommateIds.contains(member.uid),
-                        onClick = { toggleRoommate(member.uid) }
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                }
-                Spacer(modifier = Modifier.height(28.dp))
-
-                FormSectionLabel(text = stringResource(R.string.add_expense_split_type))
-                SplitTypeSelector(
-                    splitType = splitType,
-                    onSplitTypeSelected = { splitTypeName = it.name }
+                AppFormField(
+                    label = stringResource(R.string.add_expense_notes_optional),
+                    value = notes,
+                    onValueChange = { notes = it },
+                    placeholder = stringResource(R.string.add_expense_notes_hint),
+                    iconRes = R.drawable.ic_receipt_24,
+                    singleLine = false,
+                    minHeight = 96.dp
                 )
 
                 uiState.errorMessageRes?.let { errorMessageRes ->
-                    Spacer(modifier = Modifier.height(18.dp))
                     Text(
                         text = stringResource(errorMessageRes),
                         color = AppDanger,
@@ -222,311 +224,213 @@ fun AddExpenseScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(48.dp))
-            }
-        }
-    }
-}
-
-@Composable
-private fun FlatTopBar(
-    title: String,
-    onBack: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(44.dp)
-                .clickable(onClick = onBack),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_chevron_right_24),
-                contentDescription = stringResource(R.string.home_cd_back),
-                tint = AppInk,
-                modifier = Modifier
-                    .size(24.dp)
-                    .rotate(180f)
-            )
-        }
-        Spacer(modifier = Modifier.width(10.dp))
-        Text(
-            text = title,
-            color = AppInk,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-@Composable
-private fun FormTextField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    keyboardType: KeyboardType = KeyboardType.Text
-) {
-    Column {
-        FormSectionLabel(text = label)
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            textStyle = TextStyle(
-                color = AppInk,
-                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-                fontWeight = FontWeight.Medium
-            ),
-            decorationBox = { innerTextField ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .background(AppSurface, RoundedCornerShape(16.dp))
-                        .border(1.dp, AppBorder, RoundedCornerShape(16.dp))
-                        .padding(horizontal = 18.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    if (value.isEmpty()) {
-                        Text(
-                            text = placeholder,
-                            color = AppMuted,
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium
+                AppGradientButton(
+                    text = if (uiState.isSaving) {
+                        stringResource(R.string.add_expense_saving)
+                    } else {
+                        stringResource(R.string.add_expense_save)
+                    },
+                    onClick = {
+                        onSaveExpense(
+                            description,
+                            amount.toDoubleOrNull(),
+                            selectedCategory,
+                            splitType,
+                            selectedRoommateIds
                         )
-                    }
-                    innerTextField()
-                }
+                    },
+                    enabled = canSubmit,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
-        )
+        }
     }
 }
 
 @Composable
-private fun FormSectionLabel(text: String) {
-    Text(
-        text = text,
-        color = AppInk,
-        style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(bottom = 10.dp)
-    )
-}
-
-@Composable
-private fun CategoryGrid(
+private fun CategorySelector(
     categories: List<ExpenseCategoryOption>,
-    selectedCategory: ExpenseCategoryOption,
+    selectedCategory: ExpenseCategory,
+    optionsVisible: Boolean,
+    onToggleOptions: () -> Unit,
     onCategorySelected: (ExpenseCategoryOption) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        categories.chunked(3).forEach { rowItems ->
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                rowItems.forEach { category ->
-                    CategoryButton(
-                        text = stringResource(category.titleRes),
-                        selected = selectedCategory == category,
-                        onClick = { onCategorySelected(category) },
-                        modifier = Modifier.weight(1f)
+    val selectedOption = categories.first { it.code == selectedCategory }
+
+    Column {
+        AppSelectionField(
+            label = stringResource(R.string.add_expense_category),
+            title = stringResource(selectedOption.titleRes),
+            iconRes = R.drawable.ic_receipt_24,
+            onClick = onToggleOptions
+        )
+
+        if (optionsVisible) {
+            Spacer(modifier = Modifier.height(8.dp))
+            AppDropdownList(
+                options = categories.map {
+                    AppDropdownOption(
+                        value = it,
+                        label = stringResource(it.titleRes)
+                    )
+                },
+                selectedValue = selectedOption,
+                onSelected = onCategorySelected
+            )
+        }
+    }
+}
+
+@Composable
+private fun SplitTypeCard(
+    splitOption: SplitOption,
+    onClick: () -> Unit
+) {
+    Column {
+        AppFieldLabel(text = stringResource(R.string.add_expense_split_type))
+
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 64.dp)
+                .clip(RoundedCornerShape(AppUiTokens.ControlCorner))
+                .clickable(onClick = onClick),
+            shape = RoundedCornerShape(AppUiTokens.ControlCorner),
+            color = AppSurface,
+            border = BorderStroke(1.dp, AppBorder)
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.add_expense_paid_by_split),
+                        color = AppMuted,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = if (splitOption == SplitOption.Equal) {
+                            stringResource(R.string.add_expense_equally)
+                        } else {
+                            stringResource(splitOption.titleRes)
+                        },
+                        color = AppInk,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold
                     )
                 }
-                repeat(3 - rowItems.size) {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
+
+                Icon(
+                    painter = painterResource(R.drawable.ic_chevron_right_24),
+                    contentDescription = null,
+                    tint = AppPrimary,
+                    modifier = Modifier.size(AppUiTokens.FieldIconSize)
+                )
             }
         }
     }
 }
 
 @Composable
-private fun CategoryButton(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+private fun ParticipantsSection(
+    members: List<SplitMemberUi>,
+    selectedRoommateIds: List<String>,
+    onToggleRoommate: (String) -> Unit
 ) {
-    Surface(
-        modifier = modifier
-            .height(48.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        color = AppSurface,
-        border = BorderStroke(1.dp, if (selected) AppPrimary else AppBorder)
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Text(
-                text = text,
-                color = AppInk,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold
-            )
+    Column {
+        Text(
+            text = stringResource(R.string.add_expense_participants),
+            color = AppInk,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 7.dp)
+        )
+
+        ParticipantRow(
+            name = stringResource(R.string.add_expense_you),
+            selected = true,
+            enabled = false,
+            onClick = {}
+        )
+
+        if (members.isEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            EmptyParticipantsCard()
+        } else {
+            members.forEach { member ->
+                Spacer(modifier = Modifier.height(8.dp))
+                ParticipantRow(
+                    name = member.name.ifBlank { stringResource(R.string.home_unknown_user) },
+                    selected = selectedRoommateIds.contains(member.uid),
+                    enabled = true,
+                    onClick = { onToggleRoommate(member.uid) }
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun PaidBySelector() {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
-        shape = RoundedCornerShape(16.dp),
-        color = AppSurface,
-        border = BorderStroke(1.dp, AppBorder)
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 18.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.add_expense_you),
-                color = AppInk,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f)
-            )
-            Icon(
-                painter = painterResource(R.drawable.ic_chevron_right_24),
-                contentDescription = null,
-                tint = AppInk,
-                modifier = Modifier
-                    .size(22.dp)
-                    .rotate(90f)
-            )
-        }
-    }
-}
-
-@Composable
-private fun SplitWithRow(
+private fun ParticipantRow(
     name: String,
     selected: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit
 ) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .height(64.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        color = AppBackground,
-        border = BorderStroke(1.dp, if (selected) AppPrimary else AppBorder)
+            .heightIn(min = 60.dp)
+            .clip(RoundedCornerShape(AppUiTokens.ControlCorner))
+            .clickable(enabled = enabled, onClick = onClick),
+        shape = RoundedCornerShape(AppUiTokens.ControlCorner),
+        color = AppSurface,
+        border = BorderStroke(1.dp, AppBorder)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 18.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(22.dp)
-                    .background(
-                        if (selected) AppPrimary else AppInk.copy(alpha = 0.35f),
-                        RoundedCornerShape(3.dp)
-                    )
-            )
-            Spacer(modifier = Modifier.width(16.dp))
+            AppInitialAvatar(name = name, size = 42.dp)
+            Spacer(modifier = Modifier.width(10.dp))
             Text(
                 text = name,
                 color = AppInk,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
             )
+            AppCheckIndicator(selected = selected)
         }
     }
 }
 
 @Composable
-private fun SplitTypeSelector(
-    splitType: ExpenseSplitType,
-    onSplitTypeSelected: (ExpenseSplitType) -> Unit
-) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        SplitTypeButton(
-            text = stringResource(R.string.add_expense_equal_split),
-            selected = splitType == ExpenseSplitType.EQUAL,
-            onClick = { onSplitTypeSelected(ExpenseSplitType.EQUAL) },
-            modifier = Modifier.weight(1f)
-        )
-        SplitTypeButton(
-            text = stringResource(R.string.add_expense_custom_split),
-            selected = splitType == ExpenseSplitType.CUSTOM,
-            onClick = { onSplitTypeSelected(ExpenseSplitType.CUSTOM) },
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-private fun SplitTypeButton(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+private fun EmptyParticipantsCard() {
     Surface(
-        modifier = modifier
-            .height(48.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(14.dp),
-        color = if (selected) AppPrimary else AppSurface,
-        border = BorderStroke(1.dp, if (selected) AppPrimary else AppBorder)
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = AppSurface,
+        border = BorderStroke(1.dp, AppBorder)
     ) {
-        Box(contentAlignment = Alignment.Center) {
+        Column(modifier = Modifier.padding(14.dp)) {
             Text(
-                text = text,
-                color = if (selected) AppSurface else AppInk,
-                style = MaterialTheme.typography.bodyMedium,
+                text = stringResource(R.string.add_expense_no_friends_title),
+                color = AppInk,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold
             )
-        }
-    }
-}
-
-@Composable
-private fun AddExpenseBottomBar(
-    canSubmit: Boolean,
-    isSaving: Boolean,
-    onSave: () -> Unit
-) {
-    Surface(
-        color = AppBackground,
-        shadowElevation = 0.dp
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .imePadding()
-        ) {
-            HorizontalDivider(color = AppBorder)
-            Button(
-                onClick = onSave,
-                enabled = canSubmit,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp)
-                    .height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = AppPrimary,
-                    disabledContainerColor = AppBorder,
-                    disabledContentColor = AppSurface
-                )
-            ) {
-                Text(
-                    text = if (isSaving) {
-                        stringResource(R.string.add_expense_saving)
-                    } else {
-                        stringResource(R.string.add_expense_save)
-                    },
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.add_expense_no_friends_body),
+                color = AppMuted,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }
@@ -535,11 +439,8 @@ private fun String.toIdList(): List<String> {
     return if (isBlank()) emptyList() else split(IdSeparator)
 }
 
-private fun List<String>.toIdText(): String {
-    return joinToString(IdSeparator)
-}
-
 private fun List<String>.toggle(id: String): List<String> {
     return if (contains(id)) this - id else this + id
 }
+
 private const val IdSeparator = ","
